@@ -1,5 +1,5 @@
 ---
-name: sc-meeting-log
+name: meeting-synapse
 description: 会議の決定と宿題の SynapseConnect への記録。「この会議メモを記録して」「議事録から決定事項を残して」とメモを渡されたら必ずこのスキルを使う。決定・宿題を1件ずつに分割し、承認を得てから棚に記録する応用スキル。
 ---
 

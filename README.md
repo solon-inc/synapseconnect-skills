@@ -7,15 +7,15 @@ Claude Code の plugin marketplace 形式で配布しています。Claude.ai / 
 
 | プラグイン | 対象 | 中身 |
 |---|---|---|
-| `sc-skills` | 利用者 | 基本2スキル: `sc-memory-search`（記憶の検索）・`save-synapse`（記憶の記録 — `/save-synapse` で明示的な保存にも使える）／応用2スキル: `sc-news-pick`（ニュース収集）・`sc-meeting-log`（会議メモ記録） |
-| `sc-ops` | 導入・管理担当 | `sc-prompt-retrofit` — 既存のシステムプロンプト・CLAUDE.md・AGENTS.md を渡すと、新規/利用中を判定して SynapseConnect を最適に使える形へ修正 |
+| `sc-skills` | 利用者 | 基本2スキル: `load-synapse`（記憶の検索 — `/load-synapse` で明示的な読み込みにも）・`save-synapse`（記憶の記録 — `/save-synapse` で明示的な保存にも）／応用2スキル: `news-synapse`（ニュース収集）・`meeting-synapse`（会議メモ記録） |
+| `sc-ops` | 導入・管理担当 | `setting-synapse` — 環境確認から記録・読み込み頻度のヒアリングまで対話で行い、SynapseConnect を最適に使うシステムプロンプトを作成・設定案内する |
 
 ## 前提
 
 1. SynapseConnect の MCP コネクタに接続済みであること（接続手順は提供元の接続ガイド参照）。
 2. 基本ルール（システムプロンプト）を設定済みであること。基本ルールが「いつ動くか」を決め、
    本リポジトリのスキルが「どうやるか」を決める2層構成です。基本ルール全文は
-   `plugins/sc-ops/skills/sc-prompt-retrofit/references/base-rules.md` にあります。
+   `plugins/sc-ops/skills/setting-synapse/references/base-rules.md` にあります。
 3. 棚の実名・ID などの固有値はスキルに含まれません。`docs/config-template.md` を写して
    「設定メモ」を1枚作り、プロジェクトのナレッジ（Claude Code なら CLAUDE.md の1節）に置いてください。
 

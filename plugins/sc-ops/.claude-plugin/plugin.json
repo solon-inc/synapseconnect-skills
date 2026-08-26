@@ -1,8 +1,8 @@
 {
   "name": "sc-ops",
   "displayName": "SynapseConnect Ops",
-  "version": "0.4.0",
-  "description": "SynapseConnect の導入・運用側ツール。環境確認 → 既存プロンプト取得 → 記録/読み込みレベルのヒアリング → プロンプト作成 → 設定案内まで対話で行う sc-prompt-retrofit を含む。",
+  "version": "0.5.0",
+  "description": "SynapseConnect の導入・運用側ツール。環境確認 → 既存プロンプト取得 → 記録/読み込みレベルのヒアリング → プロンプト作成 → 設定案内まで対話で行う setting-synapse を含む。",
   "author": {
     "name": "Solon Inc."
   },

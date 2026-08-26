@@ -13,7 +13,7 @@
     {
       "name": "sc-ops",
       "source": "./plugins/sc-ops",
-      "description": "SynapseConnect の導入・運用側ツール。既存システムプロンプトを SynapseConnect 対応に修正する sc-prompt-retrofit を含む。"
+      "description": "SynapseConnect の導入・運用側ツール。対話でシステムプロンプトを作成・設定案内する setting-synapse を含む。"
     }
   ]
 }

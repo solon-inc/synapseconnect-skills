@@ -10,9 +10,9 @@
 # SynapseConnect 基本ルール
 
 SynapseConnect（会社の記憶の棚）を使う。具体的な手順は2つのスキルに従う:
-「記憶の検索」（sc-memory-search）「記憶の記録」（save-synapse）。
+「記憶の検索」（load-synapse）「記憶の記録」（save-synapse）。
 ここでは調べる順序・発動条件・不変のルールだけを定める。
-ユーザーは /save-synapse でいつでも明示的に記録を指示できる。
+ユーザーは /load-synapse で明示的な読み込み、/save-synapse で明示的な記録をいつでも指示できる。
 
 ## 調べる順序
 - まず SynapseConnect で全体像と情報どうしの関係をつかむ。
