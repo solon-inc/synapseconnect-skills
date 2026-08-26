@@ -7,7 +7,7 @@ Claude Code の plugin marketplace 形式で配布しています。Claude.ai / 
 
 | プラグイン | 対象 | 中身 |
 |---|---|---|
-| `sc-skills` | 利用者 | 基本2スキル: `sc-memory-search`（記憶の検索）・`sc-memory-record`（記憶の記録）／応用2スキル: `sc-news-pick`（ニュース収集）・`sc-meeting-log`（会議メモ記録） |
+| `sc-skills` | 利用者 | 基本2スキル: `sc-memory-search`（記憶の検索）・`save-synapse`（記憶の記録 — `/save-synapse` で明示的な保存にも使える）／応用2スキル: `sc-news-pick`（ニュース収集）・`sc-meeting-log`（会議メモ記録） |
 | `sc-ops` | 導入・管理担当 | `sc-prompt-retrofit` — 既存のシステムプロンプト・CLAUDE.md・AGENTS.md を渡すと、新規/利用中を判定して SynapseConnect を最適に使える形へ修正 |
 
 ## 前提
