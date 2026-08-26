@@ -1,5 +1,5 @@
 {
-  "name": "sc2-skills",
+  "name": "sc-skills",
   "displayName": "SynapseConnect Skills",
   "version": "0.1.0",
   "description": "SynapseConnect（組織の記憶の棚）の基本スキル2種（記憶の検索・記憶の記録）と応用スキル2種（ニュース収集・会議メモ記録）。基本ルール（システムプロンプト）とセットで使う。棚の実名・ID などの固有値は含まない（利用側の「設定メモ」に分離）。",

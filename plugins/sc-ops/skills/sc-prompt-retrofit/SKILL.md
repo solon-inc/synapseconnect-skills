@@ -1,9 +1,9 @@
 ---
-name: sc2-prompt-retrofit
-description: 既存のシステムプロンプト（Claude プロジェクトの指示欄・CLAUDE.md・AGENTS.md・エージェントの人格文）を渡されたら、SynapseConnect を最適に使える形へ修正するスキル。「このプロンプトを SynapseConnect 対応にして」「SC2 を使うように直して」「うちの指示文が最新の推奨に合っているか見て」「記憶の棚を組み込んで」などの依頼で必ず使用する。SynapseConnect という語が出ていなくても、組織の記憶・棚・記録機能をプロンプトへ組み込む/監査する依頼ならこのスキルを使うこと。新規の組み込みと、既に利用中のプロンプトの監査・更新の両方を扱う。
+name: sc-prompt-retrofit
+description: 既存のシステムプロンプト（Claude プロジェクトの指示欄・CLAUDE.md・AGENTS.md・エージェントの人格文）を渡されたら、SynapseConnect を最適に使える形へ修正するスキル。「このプロンプトを SynapseConnect 対応にして」「SynapseConnect を使うように直して」「うちの指示文が最新の推奨に合っているか見て」「記憶の棚を組み込んで」などの依頼で必ず使用する。SynapseConnect という語が出ていなくても、組織の記憶・棚・記録機能をプロンプトへ組み込む/監査する依頼ならこのスキルを使うこと。新規の組み込みと、既に利用中のプロンプトの監査・更新の両方を扱う。
 ---
 
-# sc2-prompt-retrofit — システムプロンプトへの SynapseConnect 組み込み・最適化
+# sc-prompt-retrofit — システムプロンプトへの SynapseConnect 組み込み・最適化
 
 渡されたシステムプロンプトを、SynapseConnect の現行推奨（2層構成 = 基本ルール + 手順スキル参照）に合わせて修正する。
 正本は `references/base-rules.md`（組み込む基本ルール）と `references/audit-checklist.md`（現行方針のチェックリスト）。
