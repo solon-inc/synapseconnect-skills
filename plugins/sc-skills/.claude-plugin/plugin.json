@@ -2,7 +2,7 @@
   "name": "sc-skills",
   "displayName": "SynapseConnect Skills",
   "version": "0.6.0",
-  "description": "SynapseConnect（組織の記憶の棚）の基本スキル2種（記憶の検索・記憶の記録）、応用スキル2種（ニュース収集・会議メモ記録）、ヘルプ窓口（help-synapse）。基本ルール（システムプロンプト）とセットで使う。棚の実名・ID などの固有値は含まない（利用側の「設定メモ」に分離）。",
+  "description": "SynapseConnect（組織の記憶）の基本スキル2種（記憶の検索・記憶の記録）、応用スキル2種（ニュース収集・会議メモ記録）、ヘルプ窓口（help-synapse）。基本ルール（システムプロンプト）とセットで使う。グループの実名・ID などの固有値は含まない（利用側の「設定メモ」に分離）。",
   "author": {
     "name": "Solon Inc."
   },
