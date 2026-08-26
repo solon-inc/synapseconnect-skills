@@ -1,6 +1,6 @@
 # synapseconnect-skills
 
-SynapseConnect（組織の記憶の棚）を Claude から使うための公式スキル集です。
+SynapseConnect（組織の記憶）を Claude から使うための公式スキル集です。
 Claude Code の plugin marketplace 形式で配布しています。Claude.ai / Claude Desktop でも同じ SKILL.md をスキルとして利用できます。
 
 ## 収録プラグイン
@@ -16,7 +16,7 @@ Claude Code の plugin marketplace 形式で配布しています。Claude.ai / 
 2. 基本ルール（システムプロンプト）を設定済みであること。基本ルールが「いつ動くか」を決め、
    本リポジトリのスキルが「どうやるか」を決める2層構成です。基本ルール全文は
    `plugins/sc-ops/skills/setting-synapse/references/base-rules.md` にあります。
-3. 棚の実名・ID などの固有値はスキルに含まれません。`docs/config-template.md` を写して
+3. グループの実名・ID などの固有値はスキルに含まれません。`docs/config-template.md` を写して
    「設定メモ」を1枚作り、プロジェクトのナレッジ（Claude Code なら CLAUDE.md の1節）に置いてください。
 
 ## 導入
