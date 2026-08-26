@@ -1,0 +1,10 @@
+{
+  "name": "sc2-ops",
+  "displayName": "SynapseConnect Ops",
+  "version": "0.1.0",
+  "description": "SynapseConnect の導入・運用側ツール。既存システムプロンプトを渡すと、新規/利用中を判定して SynapseConnect を最適に使える形へ修正する sc2-prompt-retrofit を含む。",
+  "author": {
+    "name": "Solon Inc."
+  },
+  "skills": "./skills/"
+}

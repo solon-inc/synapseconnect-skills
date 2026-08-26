@@ -1,0 +1,19 @@
+{
+  "name": "synapseconnect-skills",
+  "description": "SynapseConnect（組織の記憶の棚）を Claude から使うためのスキル集。利用者向け sc2-skills（記憶の検索・記録+応用）と導入側向け sc2-ops（プロンプト対応化）を配布する。",
+  "owner": {
+    "name": "Solon Inc."
+  },
+  "plugins": [
+    {
+      "name": "sc2-skills",
+      "source": "./plugins/sc2-skills",
+      "description": "SynapseConnect（組織の記憶の棚）の基本スキル2種（記憶の検索・記憶の記録）と応用スキル2種（ニュース収集・会議メモ記録）。基本ルール（システムプロンプト）とセットで使う利用者向けプラグイン。"
+    },
+    {
+      "name": "sc2-ops",
+      "source": "./plugins/sc2-ops",
+      "description": "SynapseConnect の導入・運用側ツール。既存システムプロンプトを SynapseConnect 対応に修正する sc2-prompt-retrofit を含む。"
+    }
+  ]
+}
