@@ -37,7 +37,8 @@
       "record_outcome": "success",
       "chat_outcome": "success",
       "expected_status": "preview",
-      "expected_trace": []
+      "expected_trace": [],
+      "expect_preview_placeholders": true
     },
     {
       "name": "first_use_stays_preview_when_dry_run_disabled",
@@ -47,7 +48,8 @@
       "record_outcome": "success",
       "chat_outcome": "success",
       "expected_status": "preview",
-      "expected_trace": []
+      "expected_trace": [],
+      "expect_preview_placeholders": true
     },
     {
       "name": "confirmed_success_records_before_chat",
@@ -127,7 +129,8 @@
       "chat_outcome": "failure",
       "expected_status": "chat_failed",
       "expected_trace": ["add_memory", "chatwork_post_message"],
-      "expect_manual_message": true
+      "expect_manual_message": true,
+      "expect_manual_to_tag": false
     },
     {
       "name": "team_share_uses_team_shelf_without_to_tag",

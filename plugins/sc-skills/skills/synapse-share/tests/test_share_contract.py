@@ -80,6 +80,14 @@ def build_chat_message(config: dict, request: dict, recipient: dict, episode_uui
     )
 
 
+def redact_to_id(message: str) -> str:
+    return re.sub(r"^\[To:[^]]+\]", "[To:<設定済み>]", message)
+
+
+def without_to_tag(message: str) -> str:
+    return re.sub(r"^\[To:[^]]+\]\n", "", message)
+
+
 def run_case(config: dict, request: dict, case: dict) -> dict:
     trace: list[str] = []
     if has_sensitive_content(request):
@@ -93,8 +101,16 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
         return {"status": "recipient_not_allowed", "trace": trace}
 
     record = build_record(request, recipient)
+    preview_message = redact_to_id(
+        build_chat_message(config, request, recipient, "<記録後に確定>")
+    )
     if not case["confirmed"] and (case["first_use"] or config.get("dry_run", True)):
-        return {"status": "preview", "trace": trace, "record": record}
+        return {
+            "status": "preview",
+            "trace": trace,
+            "record": record,
+            "message": preview_message,
+        }
 
     trace.append("add_memory")
     if case["record_outcome"] == "failure":
@@ -110,7 +126,7 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
             "trace": trace,
             "record": record,
             "room_id": recipient["room_id"],
-            "manual_message": message,
+            "manual_message": without_to_tag(message),
         }
     return {
         "status": "sent",
@@ -154,6 +170,12 @@ class ShareContractTest(unittest.TestCase):
                 self.assertEqual(case["expected_trace"], result["trace"])
                 if case.get("expect_manual_message"):
                     self.assertIn("manual_message", result)
+                if case.get("expect_manual_to_tag") is False:
+                    self.assertNotIn("[To:", result["manual_message"])
+                if case.get("expect_preview_placeholders"):
+                    self.assertIn("<記録後に確定>", result["message"])
+                    self.assertIn("[To:<設定済み>]", result["message"])
+                    self.assertNotIn("account-200", result["message"])
                 if "expected_group_id" in case:
                     self.assertEqual(case["expected_group_id"], result["record"]["group_id"])
                 if "expected_room_id" in case:
