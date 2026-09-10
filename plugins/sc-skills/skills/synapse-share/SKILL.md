@@ -8,10 +8,9 @@ description: SynapseConnect の記録や手元の資料を「共有して」「�
 共有とは、相手が追加質問なしに次の行動を取れる要点を届け、その後の進捗と
 配信 ID で結べる状態にすること。本文や原本を Chatwork へ転載しない。
 
-配信を組み立てるときは、07cが管理する
-[型付き記録の共通契約 v2](../../references/grateful-memory-contract-v2.md)と
-[配信設定・投稿の契約](references/share-contract.md)を必ず読む。共通契約が未導入なら、
-型を推測せずプレビューまでで止める。
+配信を組み立てるときは
+[配信記録・設定・投稿の契約](references/share-contract.md)を必ず読む。この参照には
+単体zip配布でも動くよう、07cの型付き記録共通契約のうち配信に必要な部分を含める。
 
 ## 入力
 
