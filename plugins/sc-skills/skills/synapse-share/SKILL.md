@@ -56,6 +56,12 @@ description: SynapseConnect の記録や手元の資料を「共有して」「�
 `対象配信：<配信ID>` を行頭固定で入れるよう案内する。配信記録の `配信ID：` と完全一致
 したときだけ、`synapse-pairs` が配信→進捗の1対として数える。
 
+## 開発チーム棚の受入
+
+SYN-173のstaging受入を準備するときだけ
+[開発チーム棚の受入準備](references/development-team-shelf-acceptance.md)を読む。
+通常の「共有して」で棚の作成や権限変更へ進まない。
+
 ## 対象外
 
 - Chatwork のファイル添付、常駐エージェントの通知・Q&A、既読管理
