@@ -64,10 +64,17 @@ def build_record(request: dict, recipient: dict) -> dict:
     }
 
 
-def build_chat_message(config: dict, request: dict, recipient: dict, episode_uuid: str) -> str:
+def build_chat_message(
+    config: dict,
+    request: dict,
+    recipient: dict,
+    episode_uuid: str,
+    *,
+    include_to: bool = True,
+) -> str:
     prefix = (
         f"[To:{recipient['to_account_id']}]\n"
-        if recipient["notification_target"] == "個人向け"
+        if include_to and recipient["notification_target"] == "個人向け"
         else ""
     )
     note = request.get("note") or ""
@@ -82,10 +89,6 @@ def build_chat_message(config: dict, request: dict, recipient: dict, episode_uui
 
 def redact_to_id(message: str) -> str:
     return re.sub(r"^\[To:[^]]+\]", "[To:<設定済み>]", message)
-
-
-def without_to_tag(message: str) -> str:
-    return re.sub(r"^\[To:[^]]+\]\n", "", message)
 
 
 def run_case(config: dict, request: dict, case: dict) -> dict:
@@ -109,6 +112,7 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
             "status": "preview",
             "trace": trace,
             "record": record,
+            "preview_message": preview_message,
             "message": preview_message,
         }
 
@@ -126,7 +130,13 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
             "trace": trace,
             "record": record,
             "room_id": recipient["room_id"],
-            "manual_message": without_to_tag(message),
+            "manual_message": build_chat_message(
+                config,
+                request,
+                recipient,
+                "episode-test-001",
+                include_to=False,
+            ),
         }
     return {
         "status": "sent",
@@ -170,6 +180,7 @@ class ShareContractTest(unittest.TestCase):
                 self.assertEqual(case["expected_trace"], result["trace"])
                 if case.get("expect_manual_message"):
                     self.assertIn("manual_message", result)
+                    self.assertNotIn("[To:", result["manual_message"])
                 if case.get("expect_manual_to_tag") is False:
                     self.assertNotIn("[To:", result["manual_message"])
                 if case.get("expect_preview_placeholders"):
