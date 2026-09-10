@@ -1,0 +1,15 @@
+{
+  "viewer": "担当A",
+  "members": [
+    {"display_name": "担当A", "personal_group_id": "p_self"},
+    {"display_name": "担当B", "personal_group_id": "p_member_b"},
+    {"display_name": "担当C", "personal_group_id": "p_member_c"},
+    {"display_name": "担当D", "personal_group_id": "p_member_d"}
+  ],
+  "shared_groups": ["g_company", "g_development"],
+  "list_groups": [
+    {"id": "p_self", "classification": "personal", "owner_display": "担当A"},
+    {"id": "g_company", "classification": "organization"},
+    {"id": "g_development", "classification": "organization"}
+  ]
+}
