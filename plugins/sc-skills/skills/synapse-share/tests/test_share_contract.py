@@ -14,6 +14,7 @@ from pathlib import Path
 
 
 FIXTURE = Path(__file__).parent / "fixtures" / "share_cases.json"
+SKILL_ROOT = Path(__file__).resolve().parents[1]
 SHARE_ID = re.compile(r"^share-\d{8}-\d{4}-[a-z0-9]+(?:-[a-z0-9]+)*$")
 SENSITIVE = (
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----", re.IGNORECASE),
@@ -179,6 +180,16 @@ class ShareContractTest(unittest.TestCase):
             "種別：進捗\n進捗ID：prog-other-01\n対象配信：share-20260917-1100-other\n状態：途中",
         ]
         self.assertEqual(1, count_share_progress_pairs(records))
+
+    def test_markdown_references_stay_inside_standalone_skill(self) -> None:
+        link = re.compile(r"\[[^]]+\]\(([^)]+)\)")
+        for markdown in SKILL_ROOT.rglob("*.md"):
+            for target in link.findall(markdown.read_text(encoding="utf-8")):
+                if "://" in target or target.startswith("#"):
+                    continue
+                resolved = (markdown.parent / target).resolve()
+                self.assertTrue(resolved.is_relative_to(SKILL_ROOT), target)
+                self.assertTrue(resolved.is_file(), target)
 
 
 if __name__ == "__main__":
