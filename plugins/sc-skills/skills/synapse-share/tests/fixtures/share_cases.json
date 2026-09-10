@@ -4,7 +4,7 @@
     "console_url": "https://console.example.test/",
     "chatwork_tool": "chatwork_post_message",
     "recipients": {
-      "松尾": {
+      "担当A": {
         "group_id": "g_all",
         "room_id": "room-100",
         "to_account_id": "account-200",
@@ -21,8 +21,8 @@
   "base_request": {
     "title": "仕様確認",
     "summary": ["仕様を確認し、次の作業を決めてください。"],
-    "sender": "上田",
-    "recipient": "松尾",
+    "sender": "依頼者A",
+    "recipient": "担当A",
     "note": "確認をお願いします。",
     "source_ref": "https://example.test/source/42",
     "attachment": null,
@@ -83,7 +83,7 @@
     },
     {
       "name": "recipient_prefix_is_not_allowed",
-      "request_overrides": {"recipient": "松"},
+      "request_overrides": {"recipient": "担当"},
       "confirmed": true,
       "first_use": false,
       "record_outcome": "success",

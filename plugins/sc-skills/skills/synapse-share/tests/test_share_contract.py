@@ -164,7 +164,7 @@ class ShareContractTest(unittest.TestCase):
                     self.assertNotIn("[To:", result["message"])
 
     def test_record_has_fixed_machine_readable_fields(self) -> None:
-        recipient = self.fixture["config"]["recipients"]["松尾"]
+        recipient = self.fixture["config"]["recipients"]["担当A"]
         record = build_record(self.fixture["base_request"], recipient)
         lines = record["body"].splitlines()
         for prefix in ("種別：", "配信ID：", "配信者：", "宛先：", "通知先：", "要点：", "元記録：", "日時："):
