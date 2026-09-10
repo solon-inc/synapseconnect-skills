@@ -64,10 +64,17 @@ def build_record(request: dict, recipient: dict) -> dict:
     }
 
 
-def build_chat_message(config: dict, request: dict, recipient: dict, episode_uuid: str) -> str:
+def build_chat_message(
+    config: dict,
+    request: dict,
+    recipient: dict,
+    episode_uuid: str,
+    *,
+    include_to: bool = True,
+) -> str:
     prefix = (
         f"[To:{recipient['to_account_id']}]\n"
-        if recipient["notification_target"] == "個人向け"
+        if include_to and recipient["notification_target"] == "個人向け"
         else ""
     )
     note = request.get("note") or ""
@@ -78,6 +85,10 @@ def build_chat_message(config: dict, request: dict, recipient: dict, episode_uui
         f"詳細: {config['console_url']}（記録ID: {episode_uuid}）\n"
         f"配信ID: {request['share_id']}（着手したら「進捗を残す」で「対象配信：」にこのIDを）[/info]"
     )
+
+
+def redact_to_id(message: str) -> str:
+    return re.sub(r"^\[To:[^]]+\]", "[To:<設定済み>]", message)
 
 
 def run_case(config: dict, request: dict, case: dict) -> dict:
@@ -93,8 +104,17 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
         return {"status": "recipient_not_allowed", "trace": trace}
 
     record = build_record(request, recipient)
+    preview_message = redact_to_id(
+        build_chat_message(config, request, recipient, "<記録後に確定>")
+    )
     if not case["confirmed"] and (case["first_use"] or config.get("dry_run", True)):
-        return {"status": "preview", "trace": trace, "record": record}
+        return {
+            "status": "preview",
+            "trace": trace,
+            "record": record,
+            "preview_message": preview_message,
+            "message": preview_message,
+        }
 
     trace.append("add_memory")
     if case["record_outcome"] == "failure":
@@ -110,7 +130,13 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
             "trace": trace,
             "record": record,
             "room_id": recipient["room_id"],
-            "manual_message": message,
+            "manual_message": build_chat_message(
+                config,
+                request,
+                recipient,
+                "episode-test-001",
+                include_to=False,
+            ),
         }
     return {
         "status": "sent",
@@ -154,6 +180,13 @@ class ShareContractTest(unittest.TestCase):
                 self.assertEqual(case["expected_trace"], result["trace"])
                 if case.get("expect_manual_message"):
                     self.assertIn("manual_message", result)
+                    self.assertNotIn("[To:", result["manual_message"])
+                if case.get("expect_manual_to_tag") is False:
+                    self.assertNotIn("[To:", result["manual_message"])
+                if case.get("expect_preview_placeholders"):
+                    self.assertIn("<記録後に確定>", result["message"])
+                    self.assertIn("[To:<設定済み>]", result["message"])
+                    self.assertNotIn("account-200", result["message"])
                 if "expected_group_id" in case:
                     self.assertEqual(case["expected_group_id"], result["record"]["group_id"])
                 if "expected_room_id" in case:
@@ -164,7 +197,7 @@ class ShareContractTest(unittest.TestCase):
                     self.assertNotIn("[To:", result["message"])
 
     def test_record_has_fixed_machine_readable_fields(self) -> None:
-        recipient = self.fixture["config"]["recipients"]["松尾"]
+        recipient = self.fixture["config"]["recipients"]["担当A"]
         record = build_record(self.fixture["base_request"], recipient)
         lines = record["body"].splitlines()
         for prefix in ("種別：", "配信ID：", "配信者：", "宛先：", "通知先：", "要点：", "元記録：", "日時："):
