@@ -8,8 +8,8 @@
   ],
   "shared_groups": ["g_company", "g_development"],
   "list_groups": [
-    {"id": "p_self", "classification": "personal", "owner_display": "担当A"},
-    {"id": "g_company", "classification": "organization"},
-    {"id": "g_development", "classification": "organization"}
+    {"group_id": "p_self", "classification": "personal"},
+    {"group_id": "g_company", "classification": "organization"},
+    {"group_id": "g_development", "classification": "organization"}
   ]
 }

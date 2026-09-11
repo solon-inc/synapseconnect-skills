@@ -45,9 +45,8 @@ class TeamWeekScopeTest(unittest.TestCase):
         payload = copy.deepcopy(self.fixture)
         payload["list_groups"].extend(
             {
-                "id": member["personal_group_id"],
+                "group_id": member["personal_group_id"],
                 "classification": "personal",
-                "owner_display": member["display_name"],
             }
             for member in payload["members"]
             if member["display_name"] != payload["viewer"]
@@ -57,28 +56,39 @@ class TeamWeekScopeTest(unittest.TestCase):
         self.assertTrue(result["cross_personal_read_ready"])
         self.assertEqual(result["mode"], "full_team")
 
-    def test_owner_mismatch_is_not_auto_selected_as_personal(self) -> None:
+    def test_classification_mismatch_is_not_selected_as_personal(self) -> None:
         payload = copy.deepcopy(self.fixture)
-        payload["list_groups"][0]["owner_display"] = "別担当"
+        payload["list_groups"][0]["classification"] = "organization"
         result = PLANNER.plan_read_scope(payload)
         self.assertFalse(result["local_existing_access_ready"])
         self.assertEqual(
             result["unresolved"],
-            [{"group_id": "p_self", "reason": "owner_mismatch"}],
+            [{"group_id": "p_self", "reason": "classification_mismatch"}],
         )
 
-    def test_other_owner_mismatch_does_not_block_existing_access(self) -> None:
+    def test_other_classification_mismatch_does_not_block_existing_access(self) -> None:
         payload = copy.deepcopy(self.fixture)
         payload["list_groups"].append(
             {
-                "id": "p_member_b",
-                "classification": "personal",
-                "owner_display": "別担当",
+                "group_id": "p_member_b",
+                "classification": "organization",
             }
         )
         result = PLANNER.plan_read_scope(payload)
         self.assertTrue(result["local_existing_access_ready"])
         self.assertFalse(result["cross_personal_read_ready"])
+
+    def test_duplicate_personal_id_never_becomes_full_team(self) -> None:
+        payload = copy.deepcopy(self.fixture)
+        payload["members"][1]["personal_group_id"] = "p_self"
+        result = PLANNER.plan_read_scope(payload)
+        self.assertFalse(result["local_existing_access_ready"])
+        self.assertFalse(result["cross_personal_read_ready"])
+        self.assertEqual(result["mode"], "partial_existing_access")
+        self.assertEqual(
+            result["unresolved"],
+            [{"group_id": "p_self", "reason": "duplicate_member_mapping"}],
+        )
 
 
 if __name__ == "__main__":

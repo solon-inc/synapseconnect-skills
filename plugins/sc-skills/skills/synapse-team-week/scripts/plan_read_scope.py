@@ -22,9 +22,19 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("list_groups must be an array")
 
     listed_by_id = {
-        row.get("id"): row
+        row.get("group_id"): row
         for row in listed
-        if isinstance(row, dict) and isinstance(row.get("id"), str)
+        if isinstance(row, dict) and isinstance(row.get("group_id"), str)
+    }
+    configured_personal_ids = [
+        member.get("personal_group_id")
+        for member in members
+        if isinstance(member, dict) and isinstance(member.get("personal_group_id"), str)
+    ]
+    duplicate_personal_ids = {
+        group_id
+        for group_id in configured_personal_ids
+        if configured_personal_ids.count(group_id) > 1
     }
     readable: list[str] = []
     unavailable_personal: list[str] = []
@@ -37,12 +47,18 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         group_id = member.get("personal_group_id")
         if not isinstance(display_name, str) or not isinstance(group_id, str):
             raise ValueError("member display_name and personal_group_id are required")
+        if group_id in duplicate_personal_ids:
+            if not any(row["group_id"] == group_id for row in unresolved):
+                unresolved.append(
+                    {"group_id": group_id, "reason": "duplicate_member_mapping"}
+                )
+            continue
         row = listed_by_id.get(group_id)
         if row is None:
             unavailable_personal.append(group_id)
             continue
-        if row.get("owner_display") != display_name:
-            unresolved.append({"group_id": group_id, "reason": "owner_mismatch"})
+        if row.get("classification") != "personal":
+            unresolved.append({"group_id": group_id, "reason": "classification_mismatch"})
             continue
         readable.append(group_id)
 
