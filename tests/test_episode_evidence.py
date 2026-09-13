@@ -57,6 +57,13 @@ class EpisodeEvidenceTest(unittest.TestCase):
         self.assertEqual(result["reason"], "per_record_console_link_not_returned")
         self.assertEqual(result["record_id"], "def3d6b8-3574-42d7-a840-0ad05c60910c")
 
+    def test_https_source_ref_is_still_an_opaque_reference(self) -> None:
+        payload = copy.deepcopy(self.fixture["confirmed_episode"])
+        payload["episode"]["source_ref"] = "https://example.test/not-a-returned-source-url"
+        result = PLANNER.plan_source(payload)
+        self.assertIsNone(result["clickable_url"])
+        self.assertEqual(result["reason"], "per_record_console_link_not_returned")
+
     def test_returned_https_link_is_preserved_and_never_marked_permanent(self) -> None:
         payload = copy.deepcopy(self.fixture["confirmed_episode"])
         payload["episode"]["console_source_url"] = "https://console.example.test/source/exact"
@@ -67,7 +74,6 @@ class EpisodeEvidenceTest(unittest.TestCase):
 
     def test_source_tool_top_level_url_is_preserved_exactly(self) -> None:
         payload = {
-            "coverage": {"complete": True},
             "source_url": "https://signed.example.test/object?token=exact",
         }
         result = PLANNER.plan_source(payload)

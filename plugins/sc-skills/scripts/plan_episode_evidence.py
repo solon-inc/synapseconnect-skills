@@ -79,10 +79,6 @@ def plan_search(result: dict[str, Any]) -> dict[str, Any]:
 
 
 def plan_source(result: dict[str, Any]) -> dict[str, Any]:
-    coverage = result.get("coverage") if isinstance(result.get("coverage"), dict) else {}
-    episode = result.get("episode") if isinstance(result.get("episode"), dict) else None
-    if coverage.get("complete") is not True:
-        return {"clickable_url": None, "reason": "source_not_confirmed"}
     for key, kind in (
         ("console_source_url", "returned_console_url"),
         ("source_url", "returned_source_url"),
@@ -95,9 +91,16 @@ def plan_source(result: dict[str, Any]) -> dict[str, Any]:
                 "persist_as_permanent": False,
                 "constructed": False,
             }
+    coverage = result.get("coverage") if isinstance(result.get("coverage"), dict) else {}
+    episode = result.get("episode") if isinstance(result.get("episode"), dict) else None
+    if coverage.get("complete") is not True:
+        return {"clickable_url": None, "reason": "source_not_confirmed"}
     if episode is None:
         return {"clickable_url": None, "reason": "episode_not_confirmed"}
-    for key, kind in (("console_source_url", "returned_console_url"), ("source_url", "returned_source_url"), ("source_ref", "returned_source_ref")):
+    for key, kind in (
+        ("console_source_url", "returned_console_url"),
+        ("source_url", "returned_source_url"),
+    ):
         url = _https_url(episode.get(key))
         if url is not None:
             return {
