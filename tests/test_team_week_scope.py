@@ -90,6 +90,28 @@ class TeamWeekScopeTest(unittest.TestCase):
             [{"group_id": "p_self", "reason": "duplicate_member_mapping"}],
         )
 
+    def test_viewer_is_not_added_to_configured_team(self) -> None:
+        payload = {
+            "viewer": "上田役C",
+            "members": [
+                {"display_name": "担当者A", "personal_group_id": "p_member_a"}
+            ],
+            "shared_groups": ["g_company"],
+            "list_groups": [
+                {"group_id": "p_member_a", "classification": "personal"},
+                {"group_id": "p_viewer_c", "classification": "personal"},
+                {"group_id": "g_company", "classification": "organization"},
+            ],
+        }
+
+        result = PLANNER.plan_read_scope(payload)
+
+        self.assertEqual(result["configured_member_count"], 1)
+        self.assertEqual(result["configured_member_display_names"], ["担当者A"])
+        self.assertFalse(result["viewer_is_configured_member"])
+        self.assertEqual(result["readable_group_ids"], ["g_company", "p_member_a"])
+        self.assertNotIn("p_viewer_c", result["readable_group_ids"])
+
 
 if __name__ == "__main__":
     unittest.main()
