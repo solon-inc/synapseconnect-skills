@@ -33,9 +33,12 @@ SynapseConnect は「情報どうしの関係と全体感をつかむ」道具�
    a. 会話の冒頭・話題の転換時は survey_space で関係するグループの全体像をつかむ
    b. search_memory_facts で手がかりごとに検索する
       （1つの手がかりにつき1〜2回まで）
-   c. 原文が必要なときだけ search_episodes で記録本文を引く
+   c. 原文が必要なときだけ search_episodes で候補を探す。応答は候補であって一致証拠ではない。各行の `content_truncated=true` または `content_representation=bounded_prefix` は先頭 preview なので、そこから不存在・唯一性・期限・依存関係を確定しない。必要な候補だけ、返された `full_content_lookup` の `get_episode` 引数をそのまま使って全文を読む。`coverage.truncated` / `limit_reached`（候補集合）と行の `content_truncated`（本文 preview）を分ける。必要なら取得済み応答を `../../scripts/plan_episode_evidence.py` で決定的に点検する
 3. 出どころを確かめる: 答えに使う事実は get_fact_source で元の記録をたどる。
-   原本（PDF 等）がある場合は get_source_url のリンクを添える。
+   原本（PDF 等）がある場合は、取得応答に含まれる `console_source_url` または
+   `get_source_url` がその場で返した HTTPS `source_url` だけをリンクにする。URLを
+   組み立てず、署名付き・認証付きURLを恒久リンクとして記録しない。記録そのものの
+   Console URLが応答に無ければ、記録IDを示して「直接リンクは未提供」とする。
 4. 結果の読み方:
    - coverage（どこまで調べられたかの自己申告）を必ず読む
    - 「no_match（探したが無かった）」と「group_unavailable（グループに触れなかった）」

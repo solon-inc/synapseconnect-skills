@@ -1,0 +1,47 @@
+{
+  "search": {
+    "episodes": [
+      {
+        "uuid": "11111111-1111-4111-8111-111111111111",
+        "group_id": "g_company",
+        "content": "正式発注日は9/14で、金額判断だけが唯一の待ち",
+        "content_chars": 61418,
+        "content_truncated": true,
+        "content_representation": "bounded_prefix",
+        "full_content_lookup": {
+          "tool": "get_episode",
+          "arguments": {
+            "uuid": "11111111-1111-4111-8111-111111111111",
+            "group_ids": ["g_company"]
+          }
+        }
+      },
+      {
+        "uuid": "def3d6b8-3574-42d7-a840-0ad05c60910c",
+        "group_id": "g_company",
+        "content": "種別：進捗\n進捗ID：prog-req-20260913-aoba-proposal-draft-01\n対象依頼：req-20260913-aoba-proposal-draft\n担当：担当者A\n状態：途中\nやったこと：あおば商事向け提案書の説明部分（金額以外）を仕上げた。\n次の一手：上田役Cの内容確認と見積金額の判断を待つ。\n詰まり・判断要：見積金額の判断待ち（上田役Cの対応待ち）。",
+        "content_chars": 194,
+        "content_truncated": false,
+        "content_representation": "full"
+      }
+    ],
+    "coverage": {
+      "complete": false,
+      "truncated": true,
+      "reasons": ["limit_reached"],
+      "meta": {
+        "result_semantics": "candidates",
+        "match_is_evidence": false
+      }
+    }
+  },
+  "confirmed_episode": {
+    "episode": {
+      "uuid": "def3d6b8-3574-42d7-a840-0ad05c60910c",
+      "group_id": "g_company",
+      "source_ref": "req-20260913-aoba-proposal-draft",
+      "content": "種別：進捗\n進捗ID：prog-req-20260913-aoba-proposal-draft-01\n対象依頼：req-20260913-aoba-proposal-draft\n担当：担当者A\n状態：途中\nやったこと：あおば商事向け提案書の説明部分（金額以外）を仕上げた。\n次の一手：上田役Cの内容確認と見積金額の判断を待つ。\n詰まり・判断要：見積金額の判断待ち（上田役Cの対応待ち）。"
+    },
+    "coverage": {"complete": true}
+  }
+}
