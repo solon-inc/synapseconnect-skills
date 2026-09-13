@@ -12,7 +12,7 @@ from typing import Any
 def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
     viewer = payload.get("viewer")
     members = payload.get("members")
-    shared = payload.get("shared_groups")
+    shared = payload.get("shared_groups", [])
     listed = payload.get("list_groups")
     if not isinstance(viewer, str) or not viewer:
         raise ValueError("viewer must be a non-empty display name")
@@ -62,6 +62,15 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
             continue
         readable.append(group_id)
 
+    required_shared_settings = ("company_group_id", "development_group_id")
+    missing_shared_settings = [
+        key for key in required_shared_settings
+        if not isinstance(payload.get(key), str) or not payload[key].strip()
+    ]
+    required_shared_ids = {
+        payload[key] for key in required_shared_settings
+        if key not in missing_shared_settings
+    }
     missing_shared: list[str] = []
     for group_id in shared:
         if not isinstance(group_id, str):
@@ -70,6 +79,8 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
             readable.append(group_id)
         else:
             missing_shared.append(group_id)
+
+    omitted_shared = required_shared_ids - set(shared)
 
     own_group_ids = {
         member["personal_group_id"]
@@ -87,6 +98,8 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         bool(own_group_ids)
         and own_group_ids <= readable_set
         and not missing_shared
+        and not missing_shared_settings
+        and not omitted_shared
         and not (own_group_ids & unresolved_group_ids)
     )
     cross_personal_ready = (
@@ -103,6 +116,8 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         "readable_group_ids": sorted(readable_set),
         "unavailable_personal_group_ids": sorted(unavailable_personal),
         "missing_shared_group_ids": sorted(missing_shared),
+        "missing_shared_settings": missing_shared_settings,
+        "omitted_required_shared_group_ids": sorted(omitted_shared),
         "unresolved": unresolved,
         "local_existing_access_ready": local_ready,
         "cross_personal_read_ready": cross_personal_ready,

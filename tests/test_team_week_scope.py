@@ -41,6 +41,55 @@ class TeamWeekScopeTest(unittest.TestCase):
             ["p_member_b", "p_member_c", "p_member_d"],
         )
 
+    def test_missing_shared_configuration_keeps_partial_reads_not_ready(self) -> None:
+        for removed in (("company_group_id",), ("development_group_id",),
+                        ("company_group_id", "development_group_id")):
+            with self.subTest(removed=removed):
+                payload = copy.deepcopy(self.fixture)
+                for key in removed:
+                    del payload[key]
+                result = PLANNER.plan_read_scope(payload)
+                self.assertFalse(result["local_existing_access_ready"])
+                self.assertEqual(set(result["missing_shared_settings"]), set(removed))
+                self.assertIn("p_self", result["readable_group_ids"])
+
+    def test_empty_partial_or_absent_shared_scope_is_not_ready(self) -> None:
+        for shared in ([], ["g_company"], ["g_development"], None):
+            with self.subTest(shared=shared):
+                payload = copy.deepcopy(self.fixture)
+                if shared is None:
+                    del payload["shared_groups"]
+                else:
+                    payload["shared_groups"] = shared
+                result = PLANNER.plan_read_scope(payload)
+                self.assertFalse(result["local_existing_access_ready"])
+                self.assertEqual(
+                    set(result["omitted_required_shared_group_ids"]),
+                    {"g_company", "g_development"} - set(shared or []),
+                )
+                self.assertEqual(set(result["readable_group_ids"]),
+                                 {"p_self"} | set(shared or []))
+
+    def test_required_shared_not_visible_is_unavailable_not_unconfigured(self) -> None:
+        payload = copy.deepcopy(self.fixture)
+        payload["list_groups"] = [row for row in payload["list_groups"]
+                                  if row["group_id"] != "g_development"]
+        result = PLANNER.plan_read_scope(payload)
+        self.assertFalse(result["local_existing_access_ready"])
+        self.assertEqual(result["missing_shared_group_ids"], ["g_development"])
+        self.assertEqual(result["missing_shared_settings"], [])
+        self.assertEqual(result["omitted_required_shared_group_ids"], [])
+
+    def test_declarative_freshness_contract_never_defaults_null_to_24h(self) -> None:
+        # This pins the skill instructions, not a live LLM's compliance with them.
+        skill = SCRIPT.parents[1].joinpath("SKILL.md").read_text(encoding="utf-8")
+        self.assertIn('`stale=true` の場合だけ「同期が止まっている可能性」', skill)
+        self.assertIn('`stale=null` は経過時間を表示して「鮮度方針未設定のため判定不能」', skill)
+        self.assertIn('`stale=false` は設定された鮮度方針内', skill)
+        self.assertIn('明示設定された `86400` 秒（24時間）の方針は維持する', skill)
+        self.assertIn('未設定時の既定値にはしない', skill)
+        self.assertNotIn('24時間超は「同期が止まっている可能性」', skill)
+
     def test_cross_personal_acceptance_becomes_full_only_after_all_are_visible(self) -> None:
         payload = copy.deepcopy(self.fixture)
         payload["list_groups"].extend(

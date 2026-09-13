@@ -1,5 +1,7 @@
 {
   "viewer": "担当A",
+  "company_group_id": "g_company",
+  "development_group_id": "g_development",
   "members": [
     {"display_name": "担当A", "personal_group_id": "p_self"},
     {"display_name": "担当B", "personal_group_id": "p_member_b"},

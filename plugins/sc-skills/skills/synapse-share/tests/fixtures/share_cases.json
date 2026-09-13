@@ -1,5 +1,7 @@
 {
   "config": {
+    "company_group_id": "g_all",
+    "development_group_id": "g_development",
     "dry_run": true,
     "console_url": "https://console.example.test/",
     "chatwork_tool": "chatwork_post_message",

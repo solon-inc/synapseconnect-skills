@@ -102,6 +102,14 @@ def run_case(config: dict, request: dict, case: dict) -> dict:
         return {"status": "recipient_not_allowed", "trace": trace}
     if recipient["notification_target"] == "個人向け" and not recipient.get("to_account_id"):
         return {"status": "recipient_not_allowed", "trace": trace}
+    required_setting = {
+        "個人向け": "company_group_id",
+        "全社向け": "company_group_id",
+        "チーム向け": "development_group_id",
+    }.get(recipient["notification_target"])
+    expected_group = config.get(required_setting) if required_setting else None
+    if not expected_group or recipient["group_id"] != expected_group:
+        return {"status": "shelf_configuration_mismatch", "trace": trace}
 
     record = build_record(request, recipient)
     preview_message = redact_to_id(
@@ -195,6 +203,42 @@ class ShareContractTest(unittest.TestCase):
                     self.assertIn("[To:", result["message"])
                 if case.get("expect_to_tag") is False and "message" in result:
                     self.assertNotIn("[To:", result["message"])
+
+    def test_notification_shelf_mismatch_or_missing_stops_all_tools(self) -> None:
+        case = {"confirmed": True, "first_use": False,
+                "record_outcome": "success", "chat_outcome": "success"}
+        for kind, setting, expected in (
+            ("個人向け", "company_group_id", "g_all"),
+            ("全社向け", "company_group_id", "g_all"),
+            ("チーム向け", "development_group_id", "g_development"),
+        ):
+            for variant in ("match", "other_shelf", "prefix", "missing_setting", "unknown_kind"):
+                with self.subTest(kind=kind, variant=variant):
+                    config = copy.deepcopy(self.fixture["config"])
+                    row = config["recipients"]["担当A"]
+                    row["notification_target"] = kind
+                    row["group_id"] = expected
+                    if variant == "other_shelf":
+                        row["group_id"] = "g_development" if expected == "g_all" else "g_all"
+                    elif variant == "prefix":
+                        row["group_id"] = expected + "_other"
+                    elif variant == "missing_setting":
+                        del config[setting]
+                    elif variant == "unknown_kind":
+                        row["notification_target"] = "不明"
+                    result = run_case(config, self.fixture["base_request"], case)
+                    if variant == "match":
+                        self.assertEqual(result["status"], "sent")
+                        self.assertEqual(result["record"]["group_id"], expected)
+                    else:
+                        self.assertEqual(result["status"], "shelf_configuration_mismatch")
+                        self.assertEqual(result["trace"], [])
+                        self.assertNotIn("record", result)
+
+    def test_skill_declares_exact_shelf_binding_before_recording(self) -> None:
+        contract = (SKILL_ROOT / "references/share-contract.md").read_text(encoding="utf-8")
+        self.assertIn('宛先行の `group_id` が完全一致することを確認する', contract)
+        self.assertIn('記録・投稿をせず「設定要確認」で停止する', contract)
 
     def test_record_has_fixed_machine_readable_fields(self) -> None:
         recipient = self.fixture["config"]["recipients"]["担当A"]
