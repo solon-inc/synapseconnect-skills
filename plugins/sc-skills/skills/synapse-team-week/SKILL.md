@@ -23,7 +23,7 @@ description: チームの今週 — 設定メモに明示されたチームの�
 5. 全社共有と開発チーム棚では、`name` が `依頼:` `進捗:` `配信:` で始まる候補だけ本文を取り、本文の `依頼ID`／`配信ID` と `対象依頼`／`対象配信` で対を組む。進捗本文の `担当` が設定メモの表示名と完全一致するときだけ、そのメンバーの「進行中」または「詰まり・判断要」へ入れる。対応する記録が無ければ `なし` とする。
 6. 個人棚ごとに `search_memory_facts` を1回だけ使い、原本の最終同期時刻・経過秒数と API の `stale` を確認する。`stale=true` の場合だけ「同期が止まっている可能性」と表示する。`stale=false` は設定された鮮度方針内、`stale=null` は経過時間を表示して「鮮度方針未設定のため判定不能」とする。経過時間だけから停滞警告へ変換しない。明示設定された `86400` 秒（24時間）の方針は維持するが、未設定時の既定値にはしない。
 
-`plan_read_scope.py` への入力では、設定メモの全社共有・開発チーム棚の完全な ID をそれぞれ `company_group_id`・`development_group_id` に入れ、今回読む共有棚 ID の配列を `shared_groups` に入れる。必須の2設定が未設定、または片方が配列から欠落した場合、読める棚は引き続き返すが全体の準備完了とはしない。未設定の ID を名前や可視棚から補わない。
+`plan_read_scope.py` への入力では、設定メモの全社共有・開発チーム棚の完全な ID をそれぞれ `company_group_id`・`development_group_id` に入れ、今回読む共有棚 ID の配列を `shared_groups` に入れる。2設定は非空で相互に異なる ID とし、配列の集合はその2 ID と完全一致させる。必須設定が未設定・重複、または配列に欠落・追加がある場合、正しく設定された読める棚だけを返すが全体の準備完了とはしない。追加 ID や重複設定の共有棚は読まない。未設定の ID を名前や可視棚から補わない。
 
 検索語から追加候補を探す必要がある場合だけ `search_episodes` を使う。候補行の `content_truncated=true` または `content_representation=bounded_prefix` は先頭 preview であり、必要な行は返された `full_content_lookup` の引数をそのまま `get_episode` へ渡して全文を読む。previewから不存在・唯一性・期限・依存関係を確定しない。`coverage.truncated` / `limit_reached` と行の `content_truncated` は別に扱う。必要なら取得済み応答を `../../scripts/plan_episode_evidence.py` で点検する。
 

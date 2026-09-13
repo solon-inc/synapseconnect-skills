@@ -71,10 +71,20 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         payload[key] for key in required_shared_settings
         if key not in missing_shared_settings
     }
+    duplicate_shared_mapping = not missing_shared_settings and len(required_shared_ids) != 2
+    if duplicate_shared_mapping:
+        unresolved.append({"group_id": next(iter(required_shared_ids)),
+                           "reason": "duplicate_shared_mapping"})
     missing_shared: list[str] = []
+    unexpected_shared: list[str] = []
     for group_id in shared:
         if not isinstance(group_id, str):
             raise ValueError("shared group IDs must be strings")
+        if group_id not in required_shared_ids:
+            unexpected_shared.append(group_id)
+            continue
+        if duplicate_shared_mapping:
+            continue
         if group_id in listed_by_id:
             readable.append(group_id)
         else:
@@ -100,6 +110,8 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         and not missing_shared
         and not missing_shared_settings
         and not omitted_shared
+        and not unexpected_shared
+        and not duplicate_shared_mapping
         and not (own_group_ids & unresolved_group_ids)
     )
     cross_personal_ready = (
@@ -118,6 +130,7 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         "missing_shared_group_ids": sorted(missing_shared),
         "missing_shared_settings": missing_shared_settings,
         "omitted_required_shared_group_ids": sorted(omitted_shared),
+        "unexpected_shared_group_ids": sorted(set(unexpected_shared)),
         "unresolved": unresolved,
         "local_existing_access_ready": local_ready,
         "cross_personal_read_ready": cross_personal_ready,

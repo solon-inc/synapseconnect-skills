@@ -80,6 +80,25 @@ class TeamWeekScopeTest(unittest.TestCase):
         self.assertEqual(result["missing_shared_settings"], [])
         self.assertEqual(result["omitted_required_shared_group_ids"], [])
 
+    def test_extra_shared_id_is_not_read_even_when_visible(self) -> None:
+        payload = copy.deepcopy(self.fixture)
+        payload["shared_groups"].append("g_extra")
+        payload["list_groups"].append({"group_id": "g_extra", "classification": "organization"})
+        result = PLANNER.plan_read_scope(payload)
+        self.assertFalse(result["local_existing_access_ready"])
+        self.assertNotIn("g_extra", result["readable_group_ids"])
+        self.assertEqual(result["unexpected_shared_group_ids"], ["g_extra"])
+
+    def test_duplicate_required_shared_settings_are_not_ready_or_read(self) -> None:
+        payload = copy.deepcopy(self.fixture)
+        payload["development_group_id"] = payload["company_group_id"]
+        payload["shared_groups"] = ["g_company"]
+        result = PLANNER.plan_read_scope(payload)
+        self.assertFalse(result["local_existing_access_ready"])
+        self.assertEqual(result["readable_group_ids"], ["p_self"])
+        self.assertIn({"group_id": "g_company", "reason": "duplicate_shared_mapping"},
+                      result["unresolved"])
+
     def test_declarative_freshness_contract_never_defaults_null_to_24h(self) -> None:
         # This pins the skill instructions, not a live LLM's compliance with them.
         skill = SCRIPT.parents[1].joinpath("SKILL.md").read_text(encoding="utf-8")
@@ -142,6 +161,8 @@ class TeamWeekScopeTest(unittest.TestCase):
     def test_viewer_is_not_added_to_configured_team(self) -> None:
         payload = {
             "viewer": "上田役C",
+            "company_group_id": "g_company",
+            "development_group_id": "g_development",
             "members": [
                 {"display_name": "担当者A", "personal_group_id": "p_member_a"}
             ],
