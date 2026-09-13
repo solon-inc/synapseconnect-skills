@@ -95,6 +95,11 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         and not (other_group_ids & unresolved_group_ids)
     )
     return {
+        "configured_member_count": len(members),
+        "configured_member_display_names": [
+            member["display_name"] for member in members
+        ],
+        "viewer_is_configured_member": bool(own_group_ids),
         "readable_group_ids": sorted(readable_set),
         "unavailable_personal_group_ids": sorted(unavailable_personal),
         "missing_shared_group_ids": sorted(missing_shared),
