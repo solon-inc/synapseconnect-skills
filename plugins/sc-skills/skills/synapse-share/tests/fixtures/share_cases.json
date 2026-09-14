@@ -1,0 +1,151 @@
+{
+  "config": {
+    "company_group_id": "g_all",
+    "development_group_id": "g_development",
+    "dry_run": true,
+    "console_url": "https://console.example.test/",
+    "chatwork_tool": "chatwork_post_message",
+    "recipients": {
+      "担当A": {
+        "group_id": "g_all",
+        "room_id": "room-100",
+        "to_account_id": "account-200",
+        "notification_target": "個人向け"
+      },
+      "開発チーム": {
+        "group_id": "g_development",
+        "room_id": "room-300",
+        "to_account_id": null,
+        "notification_target": "チーム向け"
+      }
+    }
+  },
+  "base_request": {
+    "title": "仕様確認",
+    "summary": ["仕様を確認し、次の作業を決めてください。"],
+    "sender": "依頼者A",
+    "recipient": "担当A",
+    "note": "確認をお願いします。",
+    "source_ref": "https://example.test/source/42",
+    "attachment": null,
+    "share_id": "share-20260917-1030-spec-check",
+    "reference_time": "2026-09-17T10:30:00+09:00"
+  },
+  "cases": [
+    {
+      "name": "default_dry_run",
+      "confirmed": false,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "preview",
+      "expected_trace": [],
+      "expect_preview_placeholders": true
+    },
+    {
+      "name": "first_use_stays_preview_when_dry_run_disabled",
+      "config_overrides": {"dry_run": false},
+      "confirmed": false,
+      "first_use": true,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "preview",
+      "expected_trace": [],
+      "expect_preview_placeholders": true
+    },
+    {
+      "name": "confirmed_success_records_before_chat",
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_room_id": "room-100",
+      "expect_to_tag": true
+    },
+    {
+      "name": "first_use_confirmation_reuses_preview_and_sends",
+      "confirmed": true,
+      "first_use": true,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_room_id": "room-100"
+    },
+    {
+      "name": "conversation_room_id_cannot_override_allowlist",
+      "request_overrides": {"room_id": "room-999"},
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_room_id": "room-100"
+    },
+    {
+      "name": "recipient_prefix_is_not_allowed",
+      "request_overrides": {"recipient": "担当"},
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "recipient_not_allowed",
+      "expected_trace": []
+    },
+    {
+      "name": "secret_stops_before_preview_and_tools",
+      "request_overrides": {"note": "Authorization: Bearer sk-test-not-a-real-secret"},
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sensitive_content",
+      "expected_trace": []
+    },
+    {
+      "name": "record_failure_never_calls_chat",
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "failure",
+      "chat_outcome": "success",
+      "expected_status": "record_failed",
+      "expected_trace": ["add_memory"]
+    },
+    {
+      "name": "record_unknown_never_calls_chat",
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "unknown",
+      "chat_outcome": "success",
+      "expected_status": "record_unknown",
+      "expected_trace": ["add_memory"]
+    },
+    {
+      "name": "chat_failure_returns_manual_message_without_retry",
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "failure",
+      "expected_status": "chat_failed",
+      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expect_manual_message": true,
+      "expect_manual_to_tag": false
+    },
+    {
+      "name": "team_share_uses_team_shelf_without_to_tag",
+      "request_overrides": {"recipient": "開発チーム"},
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_group_id": "g_development",
+      "expected_room_id": "room-300",
+      "expect_to_tag": false
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "viewer": "担当A",
+  "company_group_id": "g_company",
+  "development_group_id": "g_development",
+  "members": [
+    {"display_name": "担当A", "personal_group_id": "p_self"},
+    {"display_name": "担当B", "personal_group_id": "p_member_b"},
+    {"display_name": "担当C", "personal_group_id": "p_member_c"},
+    {"display_name": "担当D", "personal_group_id": "p_member_d"}
+  ],
+  "shared_groups": ["g_company", "g_development"],
+  "list_groups": [
+    {"group_id": "p_self", "classification": "personal"},
+    {"group_id": "g_company", "classification": "organization"},
+    {"group_id": "g_development", "classification": "organization"}
+  ]
+}
