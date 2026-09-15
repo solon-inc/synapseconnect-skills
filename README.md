@@ -16,7 +16,10 @@ Claude Code の plugin marketplace 形式で配布しています。Claude.ai / 
 2. 基本ルール（システムプロンプト）を設定済みであること。基本ルールが「いつ動くか」を決め、
    本リポジトリのスキルが「どうやるか」を決める2層構成です。基本ルール全文は
    `plugins/sc-ops/skills/setting-synapse/references/base-rules.md` にあります。
-3. グループの実名・ID などの固有値はスキルに含まれません。`docs/config-template.md` を写して
+3. グループの実名・ID などの固有値はスキルに含まれません。**0.8 以降、設定メモは任意（上書き用）です。**
+   無ければ各スキルが `list_groups` から棚を自動解決し、選んだ結果を `.synapse/shelves.json` に保存します
+   （優先順位: 設定メモ > `.synapse/shelves.json` > `list_groups` の自動解決 > 既定）。
+   決め打ちしたい棚・宛先表・上限があるときだけ、`docs/config-template.md` を写して
    「設定メモ」を1枚作り、プロジェクトのナレッジ（Claude Code なら CLAUDE.md の1節）に置いてください。
 
 ## 導入

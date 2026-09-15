@@ -1,8 +1,8 @@
 {
   "name": "sc-skills",
   "displayName": "SynapseConnect Skills",
-  "version": "0.7.0",
-  "description": "SynapseConnect（組織の記憶）の基本スキル、ニュース・会議・依頼・進捗・対集計・チーム週次・安全な配信の応用スキル、ヘルプ窓口。基本ルール（システムプロンプト）とセットで使う。グループの実名・ID などの固有値は含まない（利用側の「設定メモ」に分離）。",
+  "version": "0.8.0",
+  "description": "SynapseConnect（組織の記憶）の基本スキル、ニュース・会議・依頼・進捗・対集計・チーム週次・安全な配信の応用スキル、ヘルプ窓口。基本ルール（システムプロンプト）とセットで使う。グループの実名・ID などの固有値は含まない。棚は実行時に list_groups から解決（設定メモがあれば優先）。",
   "author": {
     "name": "Solon Inc."
   },

@@ -22,7 +22,9 @@
   },
   "base_request": {
     "title": "仕様確認",
-    "summary": ["仕様を確認し、次の作業を決めてください。"],
+    "summary": [
+      "仕様を確認し、次の作業を決めてください。"
+    ],
     "sender": "依頼者A",
     "recipient": "担当A",
     "note": "確認をお願いします。",
@@ -44,7 +46,9 @@
     },
     {
       "name": "first_use_stays_preview_when_dry_run_disabled",
-      "config_overrides": {"dry_run": false},
+      "config_overrides": {
+        "dry_run": false
+      },
       "confirmed": false,
       "first_use": true,
       "record_outcome": "success",
@@ -60,7 +64,10 @@
       "record_outcome": "success",
       "chat_outcome": "success",
       "expected_status": "sent",
-      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
       "expected_room_id": "room-100",
       "expect_to_tag": true
     },
@@ -71,23 +78,33 @@
       "record_outcome": "success",
       "chat_outcome": "success",
       "expected_status": "sent",
-      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
       "expected_room_id": "room-100"
     },
     {
       "name": "conversation_room_id_cannot_override_allowlist",
-      "request_overrides": {"room_id": "room-999"},
+      "request_overrides": {
+        "room_id": "room-999"
+      },
       "confirmed": true,
       "first_use": false,
       "record_outcome": "success",
       "chat_outcome": "success",
       "expected_status": "sent",
-      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
       "expected_room_id": "room-100"
     },
     {
       "name": "recipient_prefix_is_not_allowed",
-      "request_overrides": {"recipient": "担当"},
+      "request_overrides": {
+        "recipient": "担当"
+      },
       "confirmed": true,
       "first_use": false,
       "record_outcome": "success",
@@ -97,7 +114,9 @@
     },
     {
       "name": "secret_stops_before_preview_and_tools",
-      "request_overrides": {"note": "Authorization: Bearer sk-test-not-a-real-secret"},
+      "request_overrides": {
+        "note": "Authorization: Bearer sk-test-not-a-real-secret"
+      },
       "confirmed": true,
       "first_use": false,
       "record_outcome": "success",
@@ -112,7 +131,9 @@
       "record_outcome": "failure",
       "chat_outcome": "success",
       "expected_status": "record_failed",
-      "expected_trace": ["add_memory"]
+      "expected_trace": [
+        "add_memory"
+      ]
     },
     {
       "name": "record_unknown_never_calls_chat",
@@ -121,7 +142,9 @@
       "record_outcome": "unknown",
       "chat_outcome": "success",
       "expected_status": "record_unknown",
-      "expected_trace": ["add_memory"]
+      "expected_trace": [
+        "add_memory"
+      ]
     },
     {
       "name": "chat_failure_returns_manual_message_without_retry",
@@ -130,22 +153,227 @@
       "record_outcome": "success",
       "chat_outcome": "failure",
       "expected_status": "chat_failed",
-      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
       "expect_manual_message": true,
       "expect_manual_to_tag": false
     },
     {
       "name": "team_share_uses_team_shelf_without_to_tag",
-      "request_overrides": {"recipient": "開発チーム"},
+      "request_overrides": {
+        "recipient": "開発チーム"
+      },
       "confirmed": true,
       "first_use": false,
       "record_outcome": "success",
       "chat_outcome": "success",
       "expected_status": "sent",
-      "expected_trace": ["add_memory", "chatwork_post_message"],
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
       "expected_group_id": "g_development",
       "expected_room_id": "room-300",
       "expect_to_tag": false
+    },
+    {
+      "name": "console_url_unset_falls_back_to_default",
+      "config_overrides": {
+        "console_url": null
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
+      "expect_console_url": "https://console.synapse-connect.ai/console"
+    },
+    {
+      "name": "console_url_from_memo_wins_over_default",
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
+      "expect_console_url": "https://console.example.test/"
+    },
+    {
+      "name": "dry_run_unset_defaults_to_preview",
+      "config_overrides": {
+        "dry_run": null
+      },
+      "confirmed": false,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "preview",
+      "expected_trace": [],
+      "expect_preview_placeholders": true
+    },
+    {
+      "name": "chatwork_tool_unset_is_self_detected",
+      "config_overrides": {
+        "chatwork_tool": null,
+        "available_tools": [
+          "chatwork_list_rooms",
+          "chatwork_whoami",
+          "chatwork_post_message",
+          "slack_post_message"
+        ]
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "sent",
+      "expected_trace": [
+        "add_memory",
+        "chatwork_post_message"
+      ],
+      "expected_room_id": "room-100"
+    },
+    {
+      "name": "no_chatwork_tool_stays_preview_even_when_confirmed",
+      "config_overrides": {
+        "chatwork_tool": null,
+        "available_tools": [
+          "chatwork_list_rooms",
+          "slack_post_message"
+        ]
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "preview",
+      "expected_trace": [],
+      "expect_manual_message": true,
+      "expect_preview_placeholders": true,
+      "expect_no_ids_in_output": true
+    },
+    {
+      "name": "multiple_chatwork_tools_ask_once_before_any_tool",
+      "config_overrides": {
+        "chatwork_tool": null,
+        "available_tools": [
+          "chatwork_post_message",
+          "chatwork_send_message"
+        ]
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "chat_tool_ambiguous",
+      "expected_trace": [],
+      "expected_tool_candidates": [
+        "chatwork_post_message",
+        "chatwork_send_message"
+      ]
+    },
+    {
+      "name": "no_memo_recipient_table_previews_record_but_never_posts",
+      "config_overrides": {
+        "recipients": {},
+        "chatwork_directory": [
+          {
+            "name": "担当A",
+            "room_id": "room-500",
+            "account_id": "account-600",
+            "notification_target": "個人向け"
+          }
+        ]
+      },
+      "confirmed": false,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "preview_no_allowlist",
+      "expected_trace": [],
+      "expected_group_id": "g_all",
+      "expect_manual_message": true,
+      "expect_preview_placeholders": true,
+      "expect_no_ids_in_output": true
+    },
+    {
+      "name": "no_memo_recipient_table_and_no_exact_name_match_is_refused",
+      "config_overrides": {
+        "recipients": {},
+        "chatwork_directory": [
+          {
+            "name": "担当A",
+            "room_id": "room-500",
+            "account_id": "account-600",
+            "notification_target": "個人向け"
+          }
+        ]
+      },
+      "request_overrides": {
+        "recipient": "担当"
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "recipient_not_allowed",
+      "expected_trace": []
+    },
+    {
+      "name": "memo_recipient_table_present_ignores_directory_for_unknown_name",
+      "config_overrides": {
+        "chatwork_directory": [
+          {
+            "name": "担当Z",
+            "room_id": "room-700",
+            "account_id": "account-800",
+            "notification_target": "個人向け"
+          }
+        ]
+      },
+      "request_overrides": {
+        "recipient": "担当Z"
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "recipient_not_allowed",
+      "expected_trace": []
+    },
+    {
+      "name": "no_memo_recipient_table_confirmed_records_but_never_posts",
+      "config_overrides": {
+        "recipients": {},
+        "chatwork_directory": [
+          {
+            "name": "担当A",
+            "room_id": "room-500",
+            "account_id": "account-600",
+            "notification_target": "個人向け"
+          }
+        ]
+      },
+      "confirmed": true,
+      "first_use": false,
+      "record_outcome": "success",
+      "chat_outcome": "success",
+      "expected_status": "recorded_no_allowlist",
+      "expected_trace": [
+        "add_memory"
+      ],
+      "expected_group_id": "g_all",
+      "expect_manual_message": true,
+      "expect_no_ids_in_output": true
     }
   ]
 }
