@@ -1,0 +1,135 @@
+{
+  "list_groups": [
+    {
+      "group_id": "p_1111111111aaaaaa",
+      "classification": "personal",
+      "status": "published",
+      "description": null,
+      "is_owner": true
+    },
+    {
+      "group_id": "p_2222222222bbbbbb",
+      "classification": "personal",
+      "status": "published",
+      "description": "担当B の個人棚",
+      "is_owner": false
+    },
+    {
+      "group_id": "p_3333333333cccccc",
+      "classification": "personal",
+      "status": "published",
+      "description": null,
+      "is_owner": false
+    },
+    {
+      "group_id": "p_4444444444dddddd",
+      "classification": "personal",
+      "status": "retired",
+      "description": "退職者の個人棚",
+      "is_owner": false
+    },
+    {
+      "group_id": "g_5555555555",
+      "classification": "organizational",
+      "status": "published",
+      "description": "全社共有"
+    },
+    {
+      "group_id": "g_6666666666",
+      "classification": "organizational",
+      "status": "published",
+      "description": "開発チーム"
+    },
+    {
+      "group_id": "g_7777777777",
+      "classification": "organizational",
+      "status": "published",
+      "description": "ﾆｭｰｽ収集"
+    },
+    {
+      "group_id": "g_8888888888",
+      "classification": "organizational",
+      "status": "published",
+      "description": "案件メモ"
+    },
+    {
+      "group_id": "g_9999999999",
+      "classification": "organizational",
+      "status": "retired",
+      "description": "旧 全社共有"
+    },
+    {
+      "group_id": "l_0000000000",
+      "classification": "library",
+      "status": "published",
+      "description": "資料 全社"
+    }
+  ],
+  "extra_rows": {
+    "second_company": {
+      "group_id": "g_5555555555b",
+      "classification": "organizational",
+      "status": "published",
+      "description": "Company-Wide notices"
+    },
+    "company_and_news": {
+      "group_id": "g_ambiguous",
+      "classification": "organizational",
+      "status": "published",
+      "description": "全社ニュース"
+    },
+    "second_owner": {
+      "group_id": "p_owner2",
+      "classification": "personal",
+      "status": "published",
+      "description": null,
+      "is_owner": true
+    },
+    "production_company": {
+      "group_id": "g_prod_company",
+      "classification": "organizational",
+      "status": "published",
+      "description": "テナント全体で日常業務から再利用する共有ナレッジ"
+    },
+    "device_ledger": {
+      "group_id": "g_device",
+      "classification": "organizational",
+      "status": "published",
+      "description": "Device 管理台帳"
+    },
+    "newsletter_draft": {
+      "group_id": "g_newsletter",
+      "classification": "organizational",
+      "status": "published",
+      "description": "Newsletter 下書き"
+    },
+    "generic_private": {
+      "group_id": "p_generic_private",
+      "classification": "personal",
+      "status": "published",
+      "description": "プライベート",
+      "is_owner": false
+    },
+    "generic_workspace": {
+      "group_id": "p_generic_wspace",
+      "classification": "personal",
+      "status": "published",
+      "description": "Private Workspace of someone",
+      "is_owner": false
+    }
+  },
+  "memo_overrides": {
+    "company": "g_memo_company",
+    "news": "g_7777777777",
+    "timezone": "Asia/Tokyo",
+    "console_url": "https://console.example.test/console",
+    "share_dry_run": false,
+    "news_limit_per_run": 3,
+    "members": [
+      {
+        "display_name": "担当B",
+        "personal_group_id": "p_2222222222bbbbbb"
+      }
+    ]
+  }
+}

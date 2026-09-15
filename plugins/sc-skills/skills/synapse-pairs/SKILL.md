@@ -7,11 +7,25 @@ description: 対を数える — SynapseConnect の型付き依頼・配信と�
 
 依頼→進捗、配信→進捗の対応を、本文の固定 ID 行から数える。
 
-実行前に利用者の「設定メモ」を読む。
+対象の棚は下の「棚の決め方」で実行時に決める。グループの実名・ID はこのスキルに書かない。
+
+## 棚の決め方
+
+棚・タイムゾーン・上限は、キーごとに 設定メモ > `.synapse/shelves.json` > `list_groups` の自動解決 > 既定 の優先順位で決める。
+
+1. プロジェクトのナレッジ／CLAUDE.md に `# SynapseConnect 設定メモ` 見出しのブロックがあれば、
+   そこに書かれた項目（全社共有・開発チーム棚）を最優先で使う（0.8 以降、設定メモは任意で上書き用）。
+2. 設定メモに無い項目は `list_groups` を1回呼び、その JSON をそのまま
+   `../../scripts/resolve_shelves.py` に渡して解決する（設定メモがあれば `--memo-overrides` に
+   JSON で渡す）。このスキルが使うのは `roles.company` と `roles.development`。
+3. 使う役割が `ask_user` なら、候補（group_id と description）を提示して1回だけ選んでもらい、
+   `--save-choice <役割>=<group_id>` で `.synapse/shelves.json` に保存する。
+4. `personal_self` が `stop` でも集計は読み取りだけなので続けてよいが、理由は報告に添える。
+   `roles.development` が `absent` なら全社共有だけを集計し、開発チーム棚は「未設定」と1行で示す。
 
 ## 手順
 
-1. 設定メモの全社共有と開発チーム棚を対象にする。明示されていない棚は読まない。
+1. 「棚の決め方」で決めた全社共有と開発チーム棚を対象にする。それ以外の棚は読まない。
 2. 棚ごとに `get_updates(start='beginning', advance=false)` を呼ぶ。`truncated=false` になるまで `next_cursor` を明示して読む。全ページを読めない場合は数値を確定せず、集計不能な棚と coverage を返す。
 3. `name` が `依頼:`、`進捗:`、`配信:` で始まる行だけを候補にし、`get_episode` で本文を取る。
 4. 行頭固定の `種別：` `依頼ID：` `進捗ID：` `配信ID：` `対象依頼：` `対象配信：` `状態：` を抽出する。既存の半角コロン記録も読み取ってよいが、新規記録には全角コロンを使う。必要なら `scripts/count_pairs.py` に取得済みエピソードの JSON を渡して決定的に集計する。
@@ -22,7 +36,7 @@ description: 対を数える — SynapseConnect の型付き依頼・配信と�
 配信数／進捗が付いた配信数
 依頼→初回進捗までの中央値（時刻が揃う場合）
 未対応の依頼 ID
-読めなかった棚と coverage
+読めなかった棚と coverage（未設定の棚は別に1行）
 ```
 
 ## 判定規則

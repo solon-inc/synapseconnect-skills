@@ -1,4 +1,10 @@
-"""Plan team-week reads from explicit configuration and list_groups output."""
+"""Plan team-week reads from explicit configuration and list_groups output.
+
+Since 0.8 ``members`` is optional: when it is missing or empty, personal shelves
+that are visible in ``list_groups`` and not owned by the viewer are adopted as
+members automatically, and the single ``is_owner`` personal shelf (if any) is
+treated as the viewer's own shelf.
+"""
 
 from __future__ import annotations
 
@@ -9,6 +15,35 @@ from pathlib import Path
 from typing import Any
 
 
+def _suffix_label(group_id: str) -> str:
+    return f"個人棚 …{group_id[-6:]}"
+
+
+def auto_members(listed: list[Any]) -> tuple[list[dict[str, str]], str | None]:
+    """Adopt visible, published, not-owned personal shelves as members.
+
+    Returns ``(members, viewer_personal_group_id)``; the viewer's shelf is the
+    single personal row flagged ``is_owner``, or ``None`` when absent/ambiguous.
+    """
+    members: list[dict[str, str]] = []
+    owned: list[str] = []
+    for row in listed:
+        if not isinstance(row, dict) or not isinstance(row.get("group_id"), str):
+            continue
+        if row.get("classification") != "personal":
+            continue
+        if row.get("status", "published") != "published":
+            continue
+        if row.get("is_owner") is True:
+            owned.append(row["group_id"])
+            continue
+        description = row.get("description")
+        label = description.strip() if isinstance(description, str) and description.strip() \
+            else _suffix_label(row["group_id"])
+        members.append({"display_name": label, "personal_group_id": row["group_id"]})
+    return members, owned[0] if len(owned) == 1 else None
+
+
 def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
     viewer = payload.get("viewer")
     members = payload.get("members")
@@ -16,10 +51,18 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
     listed = payload.get("list_groups")
     if not isinstance(viewer, str) or not viewer:
         raise ValueError("viewer must be a non-empty display name")
-    if not isinstance(members, list) or not isinstance(shared, list):
+    if members is not None and not isinstance(members, list):
+        raise ValueError("members must be an array when present")
+    if not isinstance(shared, list):
         raise ValueError("members and shared_groups must be arrays")
     if not isinstance(listed, list):
         raise ValueError("list_groups must be an array")
+
+    members_source = "configured"
+    viewer_personal_group_id: str | None = None
+    if not members:
+        members_source = "auto"
+        members, viewer_personal_group_id = auto_members(listed)
 
     listed_by_id = {
         row.get("group_id"): row
@@ -92,16 +135,23 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
 
     omitted_shared = required_shared_ids - set(shared)
 
-    own_group_ids = {
-        member["personal_group_id"]
-        for member in members
-        if member["display_name"] == viewer
-    }
-    other_group_ids = {
-        member["personal_group_id"]
-        for member in members
-        if member["display_name"] != viewer
-    }
+    if members_source == "auto":
+        own_group_ids = set()
+        if viewer_personal_group_id is not None:
+            own_group_ids = {viewer_personal_group_id}
+            readable.append(viewer_personal_group_id)
+        other_group_ids = {member["personal_group_id"] for member in members}
+    else:
+        own_group_ids = {
+            member["personal_group_id"]
+            for member in members
+            if member["display_name"] == viewer
+        }
+        other_group_ids = {
+            member["personal_group_id"]
+            for member in members
+            if member["display_name"] != viewer
+        }
     readable_set = set(readable)
     unresolved_group_ids = {row["group_id"] for row in unresolved}
     local_ready = (
@@ -120,6 +170,8 @@ def plan_read_scope(payload: dict[str, Any]) -> dict[str, Any]:
         and not (other_group_ids & unresolved_group_ids)
     )
     return {
+        "members_source": members_source,
+        "viewer_personal_group_id": viewer_personal_group_id,
         "configured_member_count": len(members),
         "configured_member_display_names": [
             member["display_name"] for member in members

@@ -11,7 +11,8 @@ description: SynapseConnect のヘルプ窓口。/help-synapse で呼ばれた�
 
 ## 答えてよい範囲（ここまで）
 
-- 導入済みスキル（load-synapse / save-synapse / news-synapse / meeting-synapse / setting-synapse）の使い方
+- 導入済みスキル（load-synapse / save-synapse / news-synapse / meeting-synapse / synapse-request / synapse-progress / synapse-pairs / synapse-team-week / synapse-share / setting-synapse）の使い方
+- 棚の決まり方（設定メモ > `.synapse/shelves.json` > `list_groups` の自動解決 > 既定）と、その保存ファイルの消し方
 - 一般的な流れ: 接続 → スキル導入 → /setting-synapse で設定 → ふだんの検索と記録
 - 検索・記録のコツ（固有名詞で探す・1件=1つの決定・出どころを確かめる 等）
 
@@ -42,6 +43,7 @@ description: SynapseConnect のヘルプ窓口。/help-synapse で呼ばれた�
 | 入れたはずの記録が出ない | 反映まで少し時間がかかることがある。少し待って、固有名詞で検索し直す。それでも出なければ**管理者へ** |
 | 間違って記録した | 削除はできない仕組み。「正しくは◯◯」と訂正を追記する（/save-synapse）。どうしても消したい場合は**管理者へ** |
 | 記録・読み込みの頻度を変えたい | `/setting-synapse` でレベル（Lv0〜Lv5）を選び直す |
+| 棚が自動で決まらない・違う棚に入った | 0.8 以降、棚は `list_groups` から自動で決まり、選んだ結果は `.synapse/shelves.json` に保存される。違う棚が選ばれたら `.synapse/shelves.json` を消して再実行するか、設定メモ（`# SynapseConnect 設定メモ`）で棚を上書きする。候補が出て決まらないときは、その候補の中から1つ選ぶ。候補が0件なら**管理者へ**棚の作成・権限を相談 |
 | エラー文言が出た・挙動がおかしい | 同じ操作を繰り返さず、**管理者へ**（下の連絡テンプレで） |
 
 ## 管理者への連絡テンプレ
