@@ -75,7 +75,11 @@ description: SynapseConnect の記録や手元の資料を「共有して」「�
    ユーザーがそのプレビューを「送って」と確定したときだけ手順7へ進む。
    `share.dry_run: false` でも、利用者が「共有して」等で実行を依頼していない内容を
    自動送信しない。
-7. プレビューを再利用して `add_memory` を1回呼ぶ。応答が失敗または不明なら
+7. プレビューを再利用して `add_memory` を `wait_seconds=30` を付けて1回呼ぶ（投稿文に記録 ID が
+   要るため）。`queued` が返ったら `get_ingest_status(job_id)` で `succeeded` と
+   `episode_uuid`（`job.result.episode_uuid`）を確かめるまで Chatwork へ進まない。`queued` は失敗ではないが、
+   完了の確認でもない。
+   確かめられないまま終わるとき、承認待ち（`awaiting_approval`）、失敗または不明なら
    Chatwork を呼ばず、同じ配信 ID のまま照合が必要と報告する。盲目的に再実行しない。
    宛先表が無い、または宛先が表に無い場合は、記録後も投稿せず手順8を飛ばして手動投稿用本文を返す。
 8. SynapseConnect の記録成功を確認し、プレビューの記録 ID だけを返された ID に
