@@ -1,4 +1,8 @@
-"""Filter get_updates metadata by an explicit half-open time range."""
+"""Filter list_episodes rows by an explicit half-open time range.
+
+list_episodes treats `until` as inclusive, so rows created exactly at the
+end of the period are dropped here.
+"""
 
 from __future__ import annotations
 

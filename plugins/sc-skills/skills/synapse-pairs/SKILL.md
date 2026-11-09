@@ -26,7 +26,7 @@ description: 対を数える — SynapseConnect の型付き依頼・配信と�
 ## 手順
 
 1. 「棚の決め方」で決めた全社共有と開発チーム棚を対象にする。それ以外の棚は読まない。
-2. 棚ごとに `get_updates(start='beginning', advance=false)` を呼ぶ。`truncated=false` になるまで `next_cursor` を明示して読む。全ページを読めない場合は数値を確定せず、集計不能な棚と coverage を返す。
+2. 棚ごとに `list_episodes(group_id=..., limit=100)` を呼ぶ（読むだけで、`get_updates` の栞には触れない）。期間を指定されたときだけ since / until（取り込んだ日時、タイムゾーン付き）を付ける。抜粋（`preview`）は既定のまま付ける — 抜粋を外すと `name` が返らない。`truncated=false` になるまで、返された `next_cursor` を `cursor` に渡して読む（`next_cursor` は最後のページでも返るので、止める条件にしない）。`ledger_unavailable`・`partial_backend_failure` や全ページを読めない場合は数値を確定せず、集計不能な棚と coverage を返す。
 3. `name` が `依頼:`、`進捗:`、`配信:` で始まる行だけを候補にし、`get_episode` で本文を取る。
 4. 行頭固定の `種別：` `依頼ID：` `進捗ID：` `配信ID：` `対象依頼：` `対象配信：` `状態：` を抽出する。既存の半角コロン記録も読み取ってよいが、新規記録には全角コロンを使う。必要なら `scripts/count_pairs.py` に取得済みエピソードの JSON を渡して決定的に集計する。
 5. 次だけを返す。
@@ -48,4 +48,4 @@ description: 対を数える — SynapseConnect の型付き依頼・配信と�
 - 実体抽出、検索候補、名前の類似だけでは対にしない。
 - 人別の件数・割合・順位・評価を出さない。
 
-`ledger_unavailable` や結果不明では栞を進めず、同じカーソルから再開する。読めなかった範囲を0件として集計しない。
+`ledger_unavailable` や結果不明では、同じ `cursor` から読み直す。読めなかった範囲を0件として集計しない。

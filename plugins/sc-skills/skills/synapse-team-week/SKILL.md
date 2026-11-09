@@ -26,7 +26,7 @@ description: チームの今週 — チームの個人棚・全社共有・開�
    description が無いか「プライベート」等の汎用既定名なら `個人棚 …<末尾6桁>` になる（`name_source`
    は `description`／`group_id_suffix`／`memo`）。
 4. `personal_self` が `stop` なら、このスキルはそこで止まり、棚を読まず理由（`personal_self_missing`／
-   `personal_self_ambiguous` と候補）を伝える。stream 名を作れないため、共有棚だけで続けない。
+   `personal_self_ambiguous` と候補）を伝える。実行者の棚を決められないため、共有棚だけで続けない。
    `roles.development` が `absent` なら共有棚は全社共有だけで進め、出力末尾に「開発チーム棚: 未設定」と
    1行だけ書く（「読めなかった棚」には入れない）。
 
@@ -39,7 +39,7 @@ description: チームの今週 — チームの個人棚・全社共有・開�
 
 1. 対象メンバーを決める。設定メモに `members`（表示名と個人棚 ID）があればそれだけを使う。無ければ「棚の決め方」の `team` 全件を対象メンバーとし、表示名には `label` を使う。実行者の個人棚は `personal_self` から読む。全社共有・開発チーム棚は `roles` から取る。記録の `author_subject` だけで別の人を対象メンバーへ足さない。
 2. `list_groups` で、使う各 ID が見えて個人棚は `classification=personal` であることを照合する。所有者名が公開されない環境でも、表示名や短縮 ID から所有者を推測しない。完全な ID だけを使い、ID が無い、または分類が違う場合はその人を読まず「設定要確認」とする。必要なら、決めた設定と取得済み `list_groups` 行を `scripts/plan_read_scope.py` に渡して、現行権限で読める範囲を決定的に分ける（`members` を省略すると `list_groups` の personal かつ `is_owner` でない行を自動採用し、`is_owner` の行を実行者の個人棚として扱う）。利用者が求めた人数より対象メンバーが少ない場合、差分は「設定メモで未設定」または「現行権限では見えない」とし、人や棚が存在しないとは断定しない。
-3. 棚ごとに `get_updates(start='beginning', advance=false, limit=50, stream='team-week-<personal_self の group_id 末尾8桁>')` を呼ぶ。stream 名は実行者ごとに固定し、他の用途の栞と混ぜない。個人棚は `origins=['obsidian']` と `origins=['mcp']` を分ける。`truncated=false` になるまで、返された `next_cursor` を明示して読む。必要なら `scripts/filter_period.py` で `created_at` を期間内に絞る。栞は進めない。全ページを読めない場合はその棚の期間集計を作らず、「期間を網羅できず集計不能」と coverage に出す。
+3. 棚ごとに `list_episodes(group_id=..., since=<期間の始点>, until=<期間の終点>, limit=100)` を呼ぶ（読むだけで、`get_updates` の栞には触れない）。since / until は取り込んだ日時（`created_at`）で、タイムゾーン付きで渡す。抜粋（`preview`）は既定のまま付ける — 抜粋を外すと `name` が返らない（`依頼:` などで絞れない）。個人棚は `origins=['obsidian']` と `origins=['mcp']` を分ける。`truncated=false` になるまで、返された `next_cursor` を `cursor` に渡して読む（`next_cursor` は最後のページでも返るので、止める条件にしない）。until は終点を含むので、集めた行を `scripts/filter_period.py` に渡し、始点を含み終点を含まない期間に絞る。空のときは `coverage.reasons` を見て、`no_match` だけを「期間内に記録なし」とする。`ledger_unavailable`・`partial_backend_failure` や全ページを読めない場合はその棚の期間集計を作らず、「期間を網羅できず集計不能」と coverage に出す。
 4. 個人棚は `origin=obsidian` のノート名・変更種別を、そのメンバーの「やったこと」に最大3件出す。ノート名だけから進行中・詰まり・判断要を推測しない。要点化は求められたときだけ行う。意思決定・顧客更新を見る場合は必要な行だけ `get_episode` で本文を取る。
 5. 全社共有と開発チーム棚では、`name` が `依頼:` `進捗:` `配信:` で始まる候補だけ本文を取り、本文の `依頼ID`／`配信ID` と `対象依頼`／`対象配信` で対を組む。進捗本文の `担当` が対象メンバーの表示名（設定メモの表示名、または `team` の `label`）と完全一致するときだけ、そのメンバーの「進行中」または「詰まり・判断要」へ入れる。対応する記録が無ければ `なし` とする。
 6. 個人棚ごとに `search_memory_facts` を1回だけ使い、原本の最終同期時刻・経過秒数と API の `stale` を確認する。`stale=true` の場合だけ「同期が止まっている可能性」と表示する。`stale=false` は設定された鮮度方針内、`stale=null` は経過時間を表示して「鮮度方針未設定のため判定不能」とする。経過時間だけから停滞警告へ変換しない。明示設定された `86400` 秒（24時間）の方針は維持するが、未設定時の既定値にはしない。
@@ -77,7 +77,7 @@ description: チームの今週 — チームの個人棚・全社共有・開�
 - `group_unavailable` は「権限なし」、`ledger_unavailable` は「増えたか不明」、全ページを取り切れない場合は「期間を網羅できず集計不能」と区別する。
 - 読めた棚だけで結果を返し、読めない棚のエラー本文を漏らさない。
 - 要求人数、対象メンバー数（設定メモまたは `team`）、読めたメンバー数が異なる場合はそれぞれを分けて示す。設定にも可視範囲にも無い残り人数を、実行者や記録中の登場人物で埋めない。
-- 対象メンバーの決まり方（設定メモ／`list_groups` 自動解決）と stream 名を末尾に1行で示す。
+- 対象メンバーの決まり方（設定メモ／`list_groups` 自動解決）と、読んだ期間（since / until）を末尾に1行で示す。
 
 個人棚の read 共有がまだ無い環境では、全社共有・開発チーム棚だけで依頼・進捗・配信をまとめる。これは個人棚3名分を読めたことや、read 共有機能の完成を意味しない。
 
