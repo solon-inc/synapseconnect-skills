@@ -11,9 +11,28 @@ class WriteResultDocumentContractTest(unittest.TestCase):
         content = WRITE_RESULT.read_text(encoding="utf-8")
         for term in ("`queued`", "`job_id`", "get_ingest_status", "`awaiting_approval`",
                      "wait_seconds=30", "`episode_uuid`", "`nothing_extracted`",
-                     "同じ `ingest_key`", "get_episode(uuid)"):
+                     "元の `ingest_key`", "`replayed: true`", "get_episode(uuid)"):
             with self.subTest(term=term):
                 self.assertIn(term, content)
+
+    def test_unknown_outcomes_are_not_reported_as_not_written(self) -> None:
+        content = WRITE_RESULT.read_text(encoding="utf-8")
+        for term in ("`unknown`", "`written` が `null`", "`retry: false`", "`write_outcome_unknown`",
+                     "`llm_timeout`", "`worker_lease_expired`", "`job` が `null`",
+                     "`ledger_unavailable`", "`coverage.complete: false`",
+                     "`status` の名前だけで「書けなかった」と決めない",
+                     "結果不明を「書けなかった」と言わない"):
+            with self.subTest(term=term):
+                self.assertIn(term, content)
+
+    def test_resend_needs_original_key_and_never_uses_absence_as_proof(self) -> None:
+        content = WRITE_RESULT.read_text(encoding="utf-8")
+        for term in ("送る前に決め", "元の `ingest_key` と同じ本文・棚",
+                     "見つからないことは「書かれていない」「送り直して安全」の証拠にならない",
+                     "新しい鍵を作らずに止まる", "自動では送らない"):
+            with self.subTest(term=term):
+                self.assertIn(term, content)
+        self.assertNotIn("棚に無いことを確かめたうえで出し直す", content)
 
     def test_every_writer_skill_treats_queued_as_not_failed(self) -> None:
         for name in ("save-synapse", "synapse-request", "synapse-progress",

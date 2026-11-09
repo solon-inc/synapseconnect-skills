@@ -12,9 +12,15 @@
 | `queued`（`job_id` あり） | 受付済み。まだ置けたかは分からない。**失敗ではない** | `get_ingest_status(job_id)` で状態を見る（下の「受付済みのとき」） |
 | `awaiting_approval` | 書き込みポリシーで、管理者の承認を待っている。承認までは検索に出ない | 再送しない。「承認待ち」と `job_id` を報告して終える |
 | 未登録の棚・権限エラーで拒否 | 書けなかった。別の棚に黙って置かれることはない | 再送しない。書けなかった棚を報告する |
-| timeout・通信断・結果不明 | 置けたか分からない | **再送しない**。下の「結果不明のとき」 |
+| timeout・通信断・`job_id` も応答も無い | 置けたか分からない（結果不明） | **再送しない**。下の「結果不明のとき」 |
 
 `group_id` を省略すると本人の個人棚に置かれ `inbox_fallback` が付く。スキルは棚を必ず明示し、省略に頼らない。
+
+## 送る前に鍵を決めて控える
+
+- `ingest_key` は送る前に決め、送った本文・棚と一緒に控える。スキルが形式を決めていれば（依頼 `req-…`・進捗 `prog-…`・配信 `share-…`）それを使う。決めていなければ `save-<yyyymmdd>-<内容の短い英字>` のように作る。
+- 省略するとサーバが採番し、通信が切れると手元に鍵が残らない。そのときは鍵を推測で作り直さない（下の「結果不明のとき」）。
+- 同じ鍵の再送はグラフに 1 件しか作らない（`replayed: true` なら既存の記録を採る）仕組みだが、**結果不明を自動で送り直してよいという意味ではない。**
 
 ## 待ち方
 
@@ -23,18 +29,22 @@
 
 ## 受付済み（queued）のとき
 
-`get_ingest_status(job_id)` の `job.status` を読む。
+`get_ingest_status(job_id)` の `job.status` と、あれば `job.written`・`job.retry`・`job.error_code` を読む。**`status` の名前だけで「書けなかった」と決めない。**
 
-- `succeeded`: `job.result.episode_uuid` が記録 ID。`job.result.extracted` が抽出の件数。
+- `succeeded`（`written: true`）: `job.result.episode_uuid` が記録 ID。`job.result.extracted` が抽出の件数。
 - `queued` / `running`: まだ途中。数回まで間をおいて見直す。終わらなければ「受付済み（job_id）・完了は未確認」と報告して終える。終わるまで「記録しました」と言わない。
 - `awaiting_approval`: 上の表と同じ。
-- `failed` など: `error_code` を添えて「書けなかった」と報告する。同じ `ingest_key` で再送するかは利用者に確かめる。
+- `unknown`、または `written` が `null`（`retry: false` を含む）: **結果不明**。`failed` でも、`error_code` が `llm_timeout`・`worker_lease_expired`・`write_outcome_unknown` のように書けたかが分からない種類なら同じ。「書けなかった」と言わず、下の「結果不明のとき」に進む。
+- `failed` で `written: false` かつ `retry: true` のときだけ「書けなかった」と報告し、`error_code` を添える。送り直すかは利用者が決める。送り直すなら**元の `ingest_key` と同じ本文・棚**で、自動では送らない。
+- 応答の `job` が `null`、`ledger_unavailable`、`coverage.complete: false`: 状態が読めなかったのであって「無い」ではない。結果不明として扱う。
 
 ## 結果不明のとき
 
-- 新しい `ingest_key` で出し直さない（重複の記録ができる）。
-- `job_id` があれば `get_ingest_status` で照会する。無ければ `list_episodes(group_id=..., since=<送った時刻の少し前>)` で、同じ `name` の行が棚にあるかを見る。
-- 棚に無いことを確かめたうえで出し直すときは、**同じ `ingest_key`** を使う（同じキーの再送はグラフに 1 件しか作らない。`replayed: true` なら既存の記録を採る）。
+- **再送しない。**新しい `ingest_key` でも、元の鍵でも、自動では送らない。照合して人の判断を待つ。
+- `job_id` があれば、間をおいて `get_ingest_status(job_id)` を見直す。`episode_uuid` が分かれば `get_episode(uuid)` で在るかを確かめる。
+- `job_id` が無ければ、`list_episodes(group_id=..., since=<送った時刻の少し前>)` で同じ `name` の行を探してよい。見つかればその記録 ID で `get_episode` する。**見つからないことは「書かれていない」「送り直して安全」の証拠にならない**（処理中・まだ届いていない・権限や読み取り範囲の不足・続きのページがありうる）。
+- 報告は「結果不明（job_id／送った時刻・name・ingest_key）。再送していない」。送り直すかは、照合の結果を見て利用者（運用では人）が決める。そのときも元の `ingest_key` と同じ本文・棚を使い、鍵が分からなければ新しい鍵を作らずに止まる。
+- 配信（synapse-share）は、結果不明の間は Chatwork へ進まない。
 
 ## 置けたことと、探せること
 
@@ -47,4 +57,4 @@
 
 - 置けたとき: 「記録しました: <name>（グループ名）」。記録 ID を求められたら `episode_uuid`。
 - 受付だけのとき: 「受付済み: <name>（グループ名、job_id）。完了は未確認」。
-- 承認待ち・書けなかった・結果不明は、それぞれその言葉で分けて報告する。
+- 承認待ち・書けなかった・結果不明は、それぞれその言葉で分けて報告する。結果不明を「書けなかった」と言わない。

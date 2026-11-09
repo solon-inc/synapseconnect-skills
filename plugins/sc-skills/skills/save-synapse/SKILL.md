@@ -51,7 +51,8 @@ description: 記憶の記録 — SynapseConnect（組織の記憶）へ書き込
    - 会話から生まれた記録なら「会話 <日付>」
 5. 投入して報告する:
    - add_memory で、グループ（group_id）を明示して投入する。`source_ref` を付け、
-     出来事の時刻が分かれば `reference_time`（タイムゾーン付き）も付ける
+     出来事の時刻が分かれば `reference_time`（タイムゾーン付き）も付ける。
+     `ingest_key` は送る前に決めて控える（省略してサーバの採番に任せない）
    - 応答は既定では待たずに返る。`queued`（受付済み）は失敗ではない。応答の読み方・
      待ち方・再送しない条件は [記録の結果の読み方](../../references/write-result.md) に従う
    - 置けたら記録 ID（episode_uuid）を控え、「記録しました: <name>（グループ名。
