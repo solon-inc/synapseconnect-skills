@@ -52,11 +52,29 @@ class ShelfResolutionDocumentContractTest(unittest.TestCase):
         self.assertIn("プレビューのみ", content)
         self.assertIn("room ID、To account ID は報告へ出さない", content)
 
-    def test_team_week_uses_auto_members_and_own_stream_name(self) -> None:
+    def test_team_week_uses_auto_members_and_period_listing(self) -> None:
         content = (SKILLS / "synapse-team-week/SKILL.md").read_text(encoding="utf-8")
         self.assertIn("`team` 全件", content)
-        self.assertIn("team-week-<", content)
-        self.assertIn("末尾8桁", content)
+        self.assertIn("list_episodes(group_id=..., since=", content)
+        self.assertIn("filter_period.py", content)
+        self.assertIn("終点を含む", content)
+        self.assertNotIn("get_updates(", content)
+        self.assertNotIn("stream=", content)
+
+    def test_pairs_lists_episodes_without_touching_bookmark(self) -> None:
+        content = (SKILLS / "synapse-pairs/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("list_episodes(group_id=..., limit=100)", content)
+        self.assertNotIn("get_updates(", content)
+        self.assertNotIn("栞を進め", content)
+
+    def test_listing_skills_keep_preview_and_do_not_stop_on_next_cursor(self) -> None:
+        for name in ("synapse-team-week", "synapse-pairs"):
+            with self.subTest(skill=name):
+                content = (SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+                self.assertIn("`name` が返らない", content)
+                self.assertIn("`truncated=false` になるまで", content)
+                self.assertIn("止める条件にしない", content)
+                self.assertIn("集計不能", content)
 
     def test_news_default_limit_and_meeting_default_shelf(self) -> None:
         news = (SKILLS / "news-synapse/SKILL.md").read_text(encoding="utf-8")
@@ -72,7 +90,7 @@ class ShelfResolutionDocumentContractTest(unittest.TestCase):
         plugin = json.loads(
             (ROOT / "plugins/sc-skills/.claude-plugin/plugin.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(plugin["version"], "0.9.0")
+        self.assertEqual(plugin["version"], "0.9.1")
         self.assertIn("list_groups", plugin["description"])
         self.assertNotIn("設定メモ」に分離", plugin["description"])
 
