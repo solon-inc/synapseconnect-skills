@@ -28,6 +28,12 @@ description: 記憶の記録 — SynapseConnect（組織の記憶）へ書き込
    - 悪い例: 議事録全文を1件（部分が検索で引けない）／
      1文ずつ10件（文脈が散る）
 2. グループを選ぶ:
+   0. 宛先が SynapseConnect の提供会社（製品への要望・不具合の報告）なら、ここから先の
+      a〜f ではなく投函にする。list_groups ではなく list_ingest_destinations の
+      postable の棚から選び、そのうえで post_to_shelf の説明に従う。合う棚が無ければ、
+      記録せずに「この会社からはまだ送れません」と伝える。宛先があいまい
+      （「SynapseConnect に要望を送って」）なら、自社の記録か提供会社への投函かを
+      利用者に選んでもらう。会社の記録（顧客の要望など）は、今までどおり下の手順で add_memory
    a. list_groups でグループの一覧を確かめる
    b. `synapse-request`・`synapse-progress`・`synapse-share` など、使っている専門スキルが
       記録契約と書き込み先を明示している場合は、その契約に従って1件だけ書く。
