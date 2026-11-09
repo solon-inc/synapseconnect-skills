@@ -50,8 +50,8 @@ description: 依頼を出す — 上司や依頼者が、SynapseConnect の全�
 1. 依頼の受け手、内容、期限、背景、判断が必要かを会話から整理する。期限が無ければ `未定` とする。
 2. 書き込み先を決める。既定は全社共有（`roles.company`）で、「開発だけに」と明示された依頼だけ開発チーム棚（`roles.development`）にする。個人棚には置かない。
 3. 固定形式の内容を作り、送信直前に `../../scripts/current_reference_time.py` を実行するか、利用環境の同等な現在時計を1回読む。`defaults.timezone`（設定メモにあればその値）を `--timezone` に渡し、無ければ省略して OS のタイムゾーンに任せる。返り値を加工せず `reference_time` に使い、その日付から `req-<yyyymmdd>-<slug>`、`name`、本文の会話日付を作る。会話時刻、メッセージの表示時刻、モデルの推測で現在時刻を埋めない。時計を取得できない、または取得後に送信が中断した場合は送信せず、現在時計を取り直す。
-4. API キー、token、password、cookie、口座、個人の連絡先、個人の評価表現が無いことを確認してから `add_memory` を1回だけ呼ぶ。`source_ref` と `reference_time` を付ける。
-5. 返された依頼 ID、棚（と決まり方: 設定メモ／保存済み／自動解決）、記録 ID、実際に渡した `reference_time` を報告する。実体抽出が0件でも記録の着地とは分けて報告する。
+4. API キー、token、password、cookie、口座、個人の連絡先、個人の評価表現が無いことを確認してから `add_memory` を1回だけ呼ぶ。`source_ref` と `reference_time` を付ける。応答は既定では待たずに返る（`queued` は失敗ではない）。読み方と、再送しない条件は [記録の結果の読み方](../../references/write-result.md) に従う。
+5. 返された依頼 ID、棚（と決まり方: 設定メモ／保存済み／自動解決）、記録 ID（受付だけなら job_id と「完了は未確認」）、実際に渡した `reference_time` を報告する。実体抽出が0件でも記録の着地とは分けて報告する。
 
 ## 止まる条件
 

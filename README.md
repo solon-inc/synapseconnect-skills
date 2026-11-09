@@ -38,6 +38,7 @@ Claude Code の plugin marketplace 形式で配布しています。Claude.ai / 
 
 - 各プラグインの `plugin.json` の `version` で版を管理します。
 - Claude Code は `/plugin marketplace update synapseconnect-skills` で更新（自動更新も既定で有効）。
+  更新したあと、開いているセッションに反映するには `/reload-plugins` を実行する（新しいセッションでは不要）。
 - zip 導入の場合は、新しい zip を再アップロードしてください。
 
 ## ライセンス

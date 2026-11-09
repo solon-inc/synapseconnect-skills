@@ -95,7 +95,9 @@ timeout、結果不明ではChatworkへ進まず、同じキーの結果を照�
 | プレビューのみ | 外部ツールを呼ばず、確認を待つ |
 | 宛先表が無い・宛先が表に無い | 確認後に記録は作るが投稿せず、記録 ID と手動投稿用本文を返す。room ID・To account ID は表示しない |
 | Chatwork ツールが0件 | 投稿せずプレビューと手動投稿用本文を返す |
-| `add_memory` 成功 | 返った記録 ID を投稿文へ入れ、Chatwork を1回呼ぶ |
+| `add_memory` 成功（`accepted`、または `queued` のあと `get_ingest_status` が `succeeded`） | 返った記録 ID（`episode_uuid`）を投稿文へ入れ、Chatwork を1回呼ぶ |
+| `add_memory` が `queued` のまま完了を確かめられない | Chatwork を呼ばず停止。`job_id` を報告し、あとで同じ `job_id` を照会する |
+| `add_memory` が `awaiting_approval` | Chatwork を呼ばず停止。管理者の承認待ちと報告する。再送しない |
 | `add_memory` 失敗・不明 | Chatwork を呼ばず停止。再実行前に同じ `ingest_key` を照合 |
 | Chatwork 成功 | 配信 ID、棚、記録 ID、投稿先の表示名を報告 |
 | Chatwork 失敗・不明 | 自動再送せず、記録 ID、投稿先の表示名、手動投稿用本文を返す。個人向け本文から `[To:]` を外し、room ID・To account ID は表示しない |

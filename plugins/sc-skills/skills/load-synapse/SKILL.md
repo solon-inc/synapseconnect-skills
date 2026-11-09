@@ -30,10 +30,23 @@ SynapseConnect は「情報どうしの関係と全体感をつかむ」道具�
    抜き出す。固有名詞が1つも無いときは、survey_space で全体像を眺めて
    当たりを付けるか、ユーザーに「どの案件の話ですか」と1つだけ確認する。
 2. 広く → 狭く:
-   a. 会話の冒頭・話題の転換時は survey_space で関係するグループの全体像をつかむ
-   b. search_memory_facts で手がかりごとに検索する
-      （1つの手がかりにつき1〜2回まで）
-   c. 原文が必要なときだけ search_episodes で候補を探す。応答は候補であって一致証拠ではない。各行の `content_truncated=true` または `content_representation=bounded_prefix` は先頭 preview なので、そこから不存在・唯一性・期限・依存関係を確定しない。必要な候補だけ、返された `full_content_lookup` の `get_episode` 引数をそのまま使って全文を読む。`coverage.truncated` / `limit_reached`（候補集合）と行の `content_truncated`（本文 preview）を分ける。必要なら取得済み応答を `../../scripts/plan_episode_evidence.py` で決定的に点検する
+   a. 会話の冒頭・話題の転換時は list_groups でグループを確かめ、survey_space で
+      関係するグループの全体像をつかむ。返った実体名（`top_entities`・
+      `growing_entities`・`unlinked_entities`）を次の検索語にする
+   b. 手がかりごとに検索する（1つの手がかりにつき1〜2回まで。グループを指定できるなら指定する）:
+      - 答えを書くなら search_memory_deep（事実・実体の要約・本文の候補を1回で返す。
+        応答が大きいので `limit` は小さく）
+      - 事実だけを短く見たい・関係名で絞りたいなら search_memory_facts、
+        人・会社・案件などの実体を探すなら search_nodes
+      - 時刻で絞るときは2種類を混ぜない: `as_of` は出来事の時点（事実にだけ効く）、
+        `since` / `until` は取り込んだ日時。どちらもタイムゾーン付きで渡す
+   c. 「◯◯について、このグループにあることを全部」と聞かれたら、軸の実体を決めて
+      explore_from でつながっているものをたどる。`anchor_ambiguous` なら候補の uuid
+      から選び、`anchor_unresolved` は「つながりが無い」ではなく「軸が見つからない」と伝える
+   d. グループの最近の記録を眺めるだけなら list_episodes（新しい順・題名と抜粋つき。
+      `since` / `until` で絞れる。続きの栞には触れない）
+   e. 原文が必要なときだけ search_episodes で候補を探す。応答は候補であって一致証拠ではない。各行の `content_truncated=true` または `content_representation=bounded_prefix` は先頭 preview なので、そこから不存在・唯一性・期限・依存関係を確定しない。必要な候補だけ、返された `full_content_lookup` の `get_episode` 引数をそのまま使って全文を読む。`coverage.truncated` / `limit_reached`（候補集合）と行の `content_truncated`（本文 preview）を分ける。行の `excerpt`・`matched_terms` は語が当たった箇所の目安であり、`null` や `[]` でも候補から外さない。新しい順に見たいときは `order='recency'`。必要なら取得済み応答を `../../scripts/plan_episode_evidence.py` で決定的に点検する
+   f. 空振りしたら言い換えは2回まで。3回目はグループの選び方を疑い、a に戻る
 3. 出どころを確かめる: 答えに使う事実は get_fact_source で元の記録をたどる。
    原本（PDF 等）がある場合は、取得応答に含まれる `console_source_url` または
    `get_source_url` がその場で返した HTTPS `source_url` だけをリンクにする。URLを
@@ -44,6 +57,12 @@ SynapseConnect は「情報どうしの関係と全体感をつかむ」道具�
    - 「no_match（探したが無かった）」と「group_unavailable（グループに触れなかった）」
      を区別して伝える。0件を「存在しない」と断定しない
    - group_unavailable はリトライしない。そのまま報告する
+   - `ledger_unavailable` は「読めなかった」であって「無い」ではない
+   - 矛盾の印（`contradiction_detected`）があれば、どれが今の事実かはその応答だけで
+     決めない。必要なら find_contradictions で全文を読み、両方を示す
+   - Obsidian の記録の `obsidian_sources[].stale` は true なら「同期が止まっている可能性」、
+     null なら「鮮度不明（最新とは限らない）」と伝える。文書（OneDrive など）の記録の
+     `document_sources[].is_latest_revision` がどれも false なら、その記録は今の版に無い
    - **鮮度を気にする**: 事実には時間の情報が付いている。新しい記録を優先し、
      古い記録と食い違ったら新しいほうを採る（判断に関わる食い違いは両方提示して確認）
 5. 答え方: グループから来た情報には出どころを添える。グループ由来の情報と

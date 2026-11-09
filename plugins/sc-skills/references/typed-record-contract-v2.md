@@ -47,6 +47,7 @@ ID は小文字 ASCII と数字・ハイフンで作る。
 - 進捗 ID / `ingest_key`: `prog-<対象ID>-<連番2桁>`
 - 配信 ID / `ingest_key`: `share-<yyyymmdd>-<hhmm>-<slug>`
 
+`add_memory` は既定では待たずに `queued` と `job_id` を返す（失敗ではない）。置けたか・承認待ちか・結果不明かの読み分けは [記録の結果の読み方](write-result.md) に従う。
 同じ `ingest_key` の再送が `replayed: true` なら既存記録を採用する。
 宛先や本文が異なる `record_mismatch`、timeout、結果不明では再投稿せず、同じキーの結果照会ができる場合だけ照会する。
 
