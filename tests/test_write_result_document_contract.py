@@ -56,5 +56,35 @@ class WriteResultDocumentContractTest(unittest.TestCase):
                 self.assertIn(tool, content)
 
 
+    def test_writers_do_not_wait_for_ingest_by_default(self) -> None:
+        content = WRITE_RESULT.read_text(encoding="utf-8")
+        for term in ("記録したら、基本は取込を待たない", "`wait_seconds` を付けずに呼ぶ",
+                     "記録を受け付けました: <name>（グループ名）", "続けて見直さない"):
+            with self.subTest(term=term):
+                self.assertIn(term, content)
+        self.assertNotIn("数回まで間をおいて見直す", content)
+        for name in ("save-synapse", "synapse-request", "synapse-progress",
+                     "meeting-synapse", "news-synapse"):
+            with self.subTest(skill=name):
+                skill = (SKILLS / name / "SKILL.md").read_text(encoding="utf-8")
+                self.assertIn("待たない", skill)
+                self.assertNotIn("wait_seconds=30", skill)
+
+    def test_load_uses_shelf_tags_and_falls_back(self) -> None:
+        content = (SKILLS / "load-synapse/SKILL.md").read_text(encoding="utf-8")
+        for term in ("`tags=[…]`", "`coverage.meta.tag_filter.unknown`", "`available`",
+                     "`tags` を外して1回だけ探し直す", "タグで読める範囲は広がらない",
+                     "since=<前に見た時刻>", "同期アプリ専用"):
+            with self.subTest(term=term):
+                self.assertIn(term, content)
+
+    def test_save_uses_tags_and_guards_received_shared_shelves(self) -> None:
+        content = (SKILLS / "save-synapse/SKILL.md").read_text(encoding="utf-8")
+        for term in ("`tags`", "記録1件には付けられない", "説明とタグの**両方**",
+                     "`shared: true`", "名指ししたときだけ書く"):
+            with self.subTest(term=term):
+                self.assertIn(term, content)
+
+
 if __name__ == "__main__":
     unittest.main()
