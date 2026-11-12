@@ -33,6 +33,15 @@ SynapseConnect は「情報どうしの関係と全体感をつかむ」道具�
    a. 会話の冒頭・話題の転換時は list_groups でグループを確かめ、survey_space で
       関係するグループの全体像をつかむ。返った実体名（`top_entities`・
       `growing_entities`・`unlinked_entities`）を次の検索語にする
+   a2. 棚のタグで絞る: list_groups の各棚の `tags`（会社の管理者が付けた部署・用途・テーマ）を見て、
+      話題に合うタグがあれば、検索の道具（survey_space・search_memory_deep・search_memory_facts・
+      search_nodes・search_episodes・explore_from）に `tags=[…]` を渡して棚を絞る。複数のタグは
+      どれかに当たる棚、`group_ids` と一緒なら両方を満たす棚になる。「A かつ B」で探すなら、両方の
+      タグを持つ棚を list_groups で選んで `group_ids` に渡す
+      - `coverage.meta.tag_filter.unknown` が空でなければ、`available` から選び直す。`available` が
+        空ならタグは付いていないので `tags` を外す
+      - タグで絞って0件なら、`tags` を外して1回だけ探し直す（タグの付け忘れがありうる）
+      - タグで読める範囲は広がらない。見えない棚はタグでも見えない
    b. 手がかりごとに検索する（1つの手がかりにつき1〜2回まで。グループを指定できるなら指定する）:
       - 答えを書くなら search_memory_deep（事実・実体の要約・本文の候補を1回で返す。
         応答が大きいので `limit` は小さく）
@@ -44,7 +53,9 @@ SynapseConnect は「情報どうしの関係と全体感をつかむ」道具�
       explore_from でつながっているものをたどる。`anchor_ambiguous` なら候補の uuid
       から選び、`anchor_unresolved` は「つながりが無い」ではなく「軸が見つからない」と伝える
    d. グループの最近の記録を眺めるだけなら list_episodes（新しい順・題名と抜粋つき。
-      `since` / `until` で絞れる。続きの栞には触れない）
+      `since` / `until` で絞れる。続きの栞には触れない）。長い作業の区切りや会話の再開では、
+      関係するグループを `list_episodes(group_id=..., since=<前に見た時刻>)` で見て、前回からの
+      新着だけを確かめる（止める条件は `truncated: false`）
    e. 原文が必要なときだけ search_episodes で候補を探す。応答は候補であって一致証拠ではない。各行の `content_truncated=true` または `content_representation=bounded_prefix` は先頭 preview なので、そこから不存在・唯一性・期限・依存関係を確定しない。必要な候補だけ、返された `full_content_lookup` の `get_episode` 引数をそのまま使って全文を読む。`coverage.truncated` / `limit_reached`（候補集合）と行の `content_truncated`（本文 preview）を分ける。行の `excerpt`・`matched_terms` は語が当たった箇所の目安であり、`null` や `[]` でも候補から外さない。新しい順に見たいときは `order='recency'`。必要なら取得済み応答を `../../scripts/plan_episode_evidence.py` で決定的に点検する
    f. 空振りしたら言い換えは2回まで。3回目はグループの選び方を疑い、a に戻る
 3. 出どころを確かめる: 答えに使う事実は get_fact_source で元の記録をたどる。
@@ -81,5 +92,8 @@ SynapseConnect は「情報どうしの関係と全体感をつかむ」道具�
 
 ## 落とし穴
 
+- 道具の一覧は、つないでいる主体（人・Bot）で違う。手順に出てくる道具が見当たらなければ、
+  呼べない道具として飛ばし、使えた道具で分かった範囲を伝える。「同期アプリ専用」と書かれた道具
+  （Obsidian・初期取込の口など）は会話の中では呼ばない
 - 検索は話題ごとに数回まで。見つからないまま掘り続けない（無いことも情報）。
 - 固有名詞なしの抽象語だけで検索しない（当たらない）。
