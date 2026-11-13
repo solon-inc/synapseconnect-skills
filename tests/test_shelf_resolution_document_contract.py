@@ -72,7 +72,7 @@ class ShelfResolutionDocumentContractTest(unittest.TestCase):
         plugin = json.loads(
             (ROOT / "plugins/sc-skills/.claude-plugin/plugin.json").read_text(encoding="utf-8")
         )
-        self.assertEqual(plugin["version"], "0.11.0")
+        self.assertEqual(plugin["version"], "0.12.0")
         self.assertIn("list_groups", plugin["description"])
         self.assertNotIn("設定メモ」に分離", plugin["description"])
 
