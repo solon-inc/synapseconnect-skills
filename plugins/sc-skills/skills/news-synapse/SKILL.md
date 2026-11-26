@@ -19,7 +19,11 @@ description: 興味関心ニュースの選定と SynapseConnect への投入。
    JSON で渡す）。このスキルが使うのは `roles.news` と `defaults.news_limit_per_run`（既定 5件/回）。
 3. `roles.news` が `ask_user` なら、候補（group_id と description）を提示して1回だけ選んでもらい、
    `--save-choice news=<group_id>` で `.synapse/shelves.json` に保存する。候補 0 件のときは
-   ニュース棚の作成または設定メモでの指定を依頼して止まる。
+   ニュース棚の作成または設定メモでの指定を依頼して止まる。作成を頼むときは、作り方を 1 文添える:
+   「管理者が Console で種類 organization の棚を作り、説明に『ニュース』という語を入れてください
+   （例:『社内の動きと外部ニュースを継続的に収録する共有グループ』）。全社・全社共有・全体・
+   company-wide・all-hands の語は説明に入れないでください（全社共有の棚と区別できず止まります）」。
+   ニュース棚が無いときに、全社共有など別の棚へ書かない。
 4. `personal_self` が `stop` なら書かずに理由を伝える。
 
 ## 手順
