@@ -34,7 +34,8 @@ class BookReadingDocumentContractTest(unittest.TestCase):
     def test_it_uses_only_tools_that_exist(self) -> None:
         tools = set(re.findall(r"`([a-z_]+)\(", self.text))
         known = {"list_tags", "list_groups", "search_memory_deep", "search_episodes",
-                 "list_library_documents", "get_library_document", "get_source_url"}
+                 "list_library_documents", "get_library_document", "get_source_url",
+                 "get_episode"}  # get_episode(uuid, group_ids): server.py の道具(#12 r1)
         self.assertTrue(tools, "the skill names its tools")
         self.assertLessEqual(tools, known)
 
@@ -46,6 +47,31 @@ class BookReadingDocumentContractTest(unittest.TestCase):
         for item in ("言い換えの語", "本の優先順位", "絞る冊数", "原本を確かめる範囲", "欄の追加"):
             self.assertIn(item, section)
         self.assertIn("差し替えても変わらないこと", section)
+
+    def test_a_parent_tag_also_collects_its_descendants(self) -> None:
+        """#12 r1 P2: 親タグから本を挙げるときは path で子孫の label も集め、打ち切りを「無い」としない。"""
+        step = self.text.split("## 2.", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("子孫のタグも集める", step)
+        self.assertIn("`path` に", step)
+        self.assertIn("`label`", step)
+        self.assertIn("「本が無い」と言わない", step)
+
+    def test_the_library_tools_are_paged_by_cursor_not_by_page(self) -> None:
+        """#12 r1 P2: 図書館の 2 つの口は cursor 方式(既定 50・最大 200)。並びは頁の順ではない。"""
+        step = self.text.split("## 3.", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("next_cursor", step)
+        self.assertIn("既定 50 件", step)
+        self.assertIn("最大 200", step)
+        self.assertIn("並びは頁の順ではない", step)
+        self.assertIn("`doc_page`", step)
+        self.assertIn("「未確認」", step)
+
+    def test_a_row_without_a_lookup_is_not_given_an_invented_one(self) -> None:
+        """#12 r1 P2: full_content_lookup が無い行は content_representation で分け、推測で作らない。"""
+        step = self.text.split("## 3.", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("`content_representation`", step)
+        self.assertIn("`full`", step)
+        self.assertIn("推測で作らない", step)
 
     def test_it_is_generic(self) -> None:
         """会社固有の言い回し・棚の ID を持たない(FCD 固有のものは各社のスキルへ)。"""
