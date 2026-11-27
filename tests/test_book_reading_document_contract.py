@@ -38,6 +38,15 @@ class BookReadingDocumentContractTest(unittest.TestCase):
         self.assertTrue(tools, "the skill names its tools")
         self.assertLessEqual(tools, known)
 
+    def test_each_company_knows_where_its_defaults_go(self) -> None:
+        """各社の既定値を足す場所: 4 段と残し方を段の名前で指し、変えられないことも書く(SYN-960)。"""
+        section = self.text.split("## 各社の既定値を足す場所", 1)[1].split("\n## ", 1)[0]
+        for name in ("必要な情報を決める", "本をリストアップする", "章・節を特定する", "原本を読む", "残し方"):
+            self.assertIn(name, section)
+        for item in ("言い換えの語", "本の優先順位", "絞る冊数", "原本を確かめる範囲", "欄の追加"):
+            self.assertIn(item, section)
+        self.assertIn("差し替えても変わらないこと", section)
+
     def test_it_is_generic(self) -> None:
         """会社固有の言い回し・棚の ID を持たない(FCD 固有のものは各社のスキルへ)。"""
         for word in ("FocusClide", "FCD", "lib-[0-9a-f]", "g_[0-9a-f]", "佐藤"):
