@@ -125,6 +125,37 @@ class ResolveShelvesTest(unittest.TestCase):
                 self.assertIn("g_ambiguous", [c["group_id"] for c in roles[role]["candidates"]])
         self.assertEqual(roles["development"]["status"], "resolved")
 
+    def test_a_news_shelf_made_as_news_synapse_instructs_resolves(self) -> None:
+        """SYN-919: news-synapse が止まるときに案内する作り方(organization・説明に「ニュース」・全社を表す語
+        を入れない)で作った棚は、ニュース棚として resolved になる。全社を表す語を入れると止まる。"""
+        rows = [row for row in self.rows if row["group_id"] != "g_7777777777"]
+        made = {
+            "group_id": "g_news_made",
+            "classification": "organizational",
+            "status": "published",
+            "description": "社内の動きと外部ニュースを継続的に収録する共有グループ",
+            "is_owner": False,
+        }
+        roles = self.resolve(rows + [made])["roles"]
+        self.assertEqual(roles["news"],
+                         {"group_id": "g_news_made", "status": "resolved", "source": "auto"})
+        self.assertEqual(roles["company"]["group_id"], "g_5555555555")
+        for word in ("全社", "全社共有", "全体", "company-wide", "all-hands"):
+            with self.subTest(word=word):
+                mixed = {**made, "description": f"{word}のニュース"}
+                news = self.resolve(rows + [mixed])["roles"]["news"]
+                self.assertEqual(news["status"], "ask_user")
+
+    def test_news_synapse_stop_message_tells_how_to_make_the_shelf(self) -> None:
+        text = (ROOT / "plugins/sc-skills/skills/news-synapse/SKILL.md").read_text(encoding="utf-8")
+        for needed in ("種類 organization の棚", "『ニュース』", "company-wide", "all-hands",
+                       "別の棚へ書かない"):
+            with self.subTest(needed=needed):
+                self.assertIn(needed, text)
+        for word in RESOLVER.ROLE_KEYWORDS["company"]:
+            with self.subTest(word=word):
+                self.assertIn(word, text)
+
     def test_production_company_description_resolves_via_zentai(self) -> None:
         rows = [row for row in self.rows if row["group_id"] != "g_5555555555"]
         rows.append(self.extra["production_company"])
