@@ -7,7 +7,7 @@ Claude Code の plugin marketplace 形式で配布しています。Claude.ai / 
 
 | プラグイン | 対象 | 中身 |
 |---|---|---|
-| `sc-skills` | 利用者 | 基本: `load-synapse`（記憶の検索）・`save-synapse`（記憶の記録）／応用: `news-synapse`（ニュース収集）・`meeting-synapse`（会議メモ記録）・`synapse-request`（依頼）・`synapse-progress`（進捗）・`synapse-pairs`（対集計）・`synapse-team-week`（チーム週次）・`synapse-share`（安全な配信）／`help-synapse`（ヘルプ窓口） |
+| `sc-skills` | 利用者 | 基本: `load-synapse`（記憶の検索）・`save-synapse`（記憶の記録）／応用: `news-synapse`（ニュース収集）・`meeting-synapse`（会議メモ記録）・`synapse-request`（依頼）・`synapse-progress`（進捗）・`synapse-pairs`（対集計）・`synapse-team-week`（チーム週次）・`synapse-share`（安全な配信）・`book-synapse`（本の読み方）／`help-synapse`（ヘルプ窓口） |
 | `sc-ops` | 導入・管理担当 | `setting-synapse` — 環境確認から記録・読み込み頻度のヒアリングまで対話で行い、SynapseConnect を最適に使うシステムプロンプトを作成・設定案内する |
 
 ## 前提
